@@ -14,6 +14,21 @@ export default class DbService {
     constructor() {
         this.knex = knexConstructor(db);
     }
+
+    async recordExists(
+        tableName: string, 
+        columnName: string, 
+        value: number | string,
+    ): Promise<boolean> {
+        const count = (await this
+                .knex(tableName)
+                .where(columnName, value)
+                .count<RecordCountType>({ count: '*' })
+                .first()
+        ).count;
+
+        return count > 0;
+    }
 }
 
 export type { RecordCountType };

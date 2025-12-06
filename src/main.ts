@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -8,12 +9,14 @@ async function bootstrap() {
         new ValidationPipe({
             transform: true,
             whitelist: true,
-            forbidNonWhitelisted: false,
+            forbidNonWhitelisted: true,
             transformOptions: {
-                enableImplicitConversion: true,
+                enableImplicitConversion: false,
             },
         }),
     );
+    
+    useContainer(app.select(AppModule), { fallbackOnErrors: true }); //nutne, aby uvnitr custom validatoru fungovalo DI
     await app.listen(8000);
 }
 

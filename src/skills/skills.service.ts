@@ -21,6 +21,7 @@ export default class SkillsService {
         ;
     }
 
+    //existuji vsechny zaznamy v tab skill s id dle skillsId: number[]
     async allSkillsExist(skillsId: number[]): Promise<boolean> {
         if (!Array.isArray(skillsId) || skillsId.length === 0) {
             throw new Error('skillsId must be array a cant be empty');
@@ -36,4 +37,23 @@ export default class SkillsService {
 
         return itemsCount === skillsId.length;
     }
+
+    async addSkillsToAstroman(itemId: number, skillsId: number[]) {
+        const rows = skillsId.map((skill: number) => {
+            return {
+                astroman_id: itemId,
+                skill_id: skill,
+            };
+        });
+        await this.db.knex.batchInsert('astroman_has_skill', rows);
+    }
+
+    async removeSkillsFromAstroman(itemId: number) {
+        await this.db
+            .knex('astroman_has_skill')
+            .where('astroman_id', itemId)
+            .del()
+        ;
+    }
+    
 }
