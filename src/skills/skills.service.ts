@@ -55,5 +55,21 @@ export default class SkillsService {
             .del()
         ;
     }
-    
+
+    async skillsAreChanged(astromanId: number, skillsId: number[]): Promise<boolean> {
+        type SkillType = {skill_id: number};
+        const skillsInAstromanRecord = (await this.db
+            .knex('astroman_has_skill')
+            .select('skill_id')
+            .where<SkillType[]>('astroman_id', astromanId)
+        ).map((skillItem: SkillType) => {
+            return skillItem.skill_id;
+        });
+        
+        skillsInAstromanRecord.sort();
+        const skillsIdSorted = [].concat(skillsId);
+        skillsIdSorted.sort();
+
+        return JSON.stringify(skillsInAstromanRecord) !== JSON.stringify(skillsIdSorted);
+    }
 }
