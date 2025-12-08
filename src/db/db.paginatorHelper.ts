@@ -14,7 +14,7 @@ export default class PaginatorHelper {
     }
 
     getPagesCount(itemsPerPage: number, itemsCount: number): number {
-        return Math.floor(itemsCount / itemsPerPage);
+        return Math.ceil(itemsCount / itemsPerPage);
     }
 
 }
