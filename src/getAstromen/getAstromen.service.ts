@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import DbService from '../db/db.service';
 import PaginatorHelper from '../db/db.paginatorHelper';
 import type { RecordCountType } from '../db/db.service';
+import { formateDateToIso } from '../utils/dateTools';
 
 type AstromanDbRecord = {
     id: number;
@@ -98,7 +99,7 @@ export default class GetAstromenService {
                 id: recordWoSkillsRaw.id,
                 firstName: recordWoSkillsRaw.first_name,
                 lastName: recordWoSkillsRaw.last_name,
-                dob: recordWoSkillsRaw.DOB.toISOString().split('T')[0],
+                dob: formateDateToIso(recordWoSkillsRaw.DOB),
             };
 
             const skillForRecord = recordsWithId.map((record: AstromanWithSkillListDbRecord) => {
@@ -117,3 +118,5 @@ export default class GetAstromenService {
         return output;
     }
 }
+
+export type { AstromanDbRecord };
