@@ -7,7 +7,9 @@ import SkillsService from '../../skills/skills.service';
 
 @ValidatorConstraint({ name: 'SkillsExist', async: true })
 @Injectable()
-export default class SkillsExistValidator implements ValidatorConstraintInterface {
+export default class SkillsExistValidator
+    implements ValidatorConstraintInterface
+{
     constructor(private readonly skillsService: SkillsService) {}
 
     async validate(values: number[]) {

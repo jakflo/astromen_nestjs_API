@@ -15,7 +15,7 @@ async function bootstrap() {
             },
         }),
     );
-    
+
     useContainer(app.select(AppModule), { fallbackOnErrors: true }); //nutne, aby uvnitr custom validatoru fungovalo DI
     await app.listen(8000);
 }

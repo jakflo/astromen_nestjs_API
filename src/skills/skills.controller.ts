@@ -8,6 +8,6 @@ export default class SkillsController {
     @Get('/allSkills')
     async getSkills() {
         const skills = await this.skills.getSkillsList();
-        return {skills};
+        return { skills };
     }
 }

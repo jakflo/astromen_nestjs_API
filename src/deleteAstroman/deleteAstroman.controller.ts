@@ -15,7 +15,7 @@ export default class DeleteAstromanController {
     @Delete('/deleteAstroman/:id')
     async deleteAstroman(
         @Param() pathParams: IdDto,
-        @Res({ passthrough: true }) res: Response
+        @Res({ passthrough: true }) res: Response,
     ) {
         const { id } = pathParams;
         const idExists = await this.db.recordExists('astroman', 'id', id);
@@ -25,6 +25,6 @@ export default class DeleteAstromanController {
         }
 
         await this.deleteAstromanService.deleteAstroman(id);
-        return {status: 'astroman successfully deleted', itemId: id};
+        return { status: 'astroman successfully deleted', itemId: id };
     }
 }

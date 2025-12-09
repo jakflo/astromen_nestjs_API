@@ -16,12 +16,12 @@ export default class DbService {
     }
 
     async recordExists(
-        tableName: string, 
-        columnName: string, 
+        tableName: string,
+        columnName: string,
         value: number | string,
     ): Promise<boolean> {
-        const count = (await this
-                .knex(tableName)
+        const count = (
+            await this.knex(tableName)
                 .where(columnName, value)
                 .count<RecordCountType>({ count: '*' })
                 .first()

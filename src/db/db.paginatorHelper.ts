@@ -7,7 +7,10 @@ type LimitAndOffsetReturn = {
 
 @Injectable()
 export default class PaginatorHelper {
-    getLimitAndOffset(page: number, itemsPerPage: number): LimitAndOffsetReturn {
+    getLimitAndOffset(
+        page: number,
+        itemsPerPage: number,
+    ): LimitAndOffsetReturn {
         const limit = itemsPerPage;
         const offset = itemsPerPage * (page - 1);
         return { limit, offset };
@@ -16,5 +19,4 @@ export default class PaginatorHelper {
     getPagesCount(itemsPerPage: number, itemsCount: number): number {
         return Math.ceil(itemsCount / itemsPerPage);
     }
-
 }

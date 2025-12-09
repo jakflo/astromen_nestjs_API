@@ -4,7 +4,7 @@ import GetAstromenService from './getAstromen.service';
 import DbModule from '../db/db.module';
 
 @Module({
-  imports: [DbModule],
+    imports: [DbModule],
     controllers: [GetAstromenController],
     providers: [GetAstromenService],
 })

@@ -6,7 +6,7 @@ import SkillsExistValidator from './validator/SkillsExistValidator';
 
 @Module({
     imports: [DbModule, SkillsModule],
-    providers: [AddOrEditAstromanCommonService, SkillsExistValidator], 
+    providers: [AddOrEditAstromanCommonService, SkillsExistValidator],
     exports: [AddOrEditAstromanCommonService, SkillsExistValidator],
 })
 export default class AddOrEditAstromanCommonModule {}

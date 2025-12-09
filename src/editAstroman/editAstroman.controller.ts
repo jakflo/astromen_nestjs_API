@@ -4,7 +4,10 @@ import EditAstromanService from './editAstroman.service';
 import IdDto from '../commonDto/IdDto';
 import AstromanItemDto from '../addOrEditAstromanCommon/dto/AstromanItemDto';
 import AddOrEditAstromanCommonService from '../addOrEditAstromanCommon/addOrEditAstromanCommon.service';
-import { getAstromanExistsErrorMessage, getItemIdNotFoundErrorMessage } from '../utils/getValidationErrorMessage';
+import {
+    getAstromanExistsErrorMessage,
+    getItemIdNotFoundErrorMessage,
+} from '../utils/getValidationErrorMessage';
 import DbService from '../db/db.service';
 
 @Controller()
@@ -18,8 +21,8 @@ export default class EditAstromanController {
     @Put('/editAstroman/:id')
     async editAstroman(
         @Param() pathParams: IdDto,
-        @Body() data: AstromanItemDto, 
-        @Res({ passthrough: true }) res: Response
+        @Body() data: AstromanItemDto,
+        @Res({ passthrough: true }) res: Response,
     ) {
         const { id } = pathParams;
         const idExists = await this.db.recordExists('astroman', 'id', id);
@@ -29,17 +32,34 @@ export default class EditAstromanController {
         }
 
         const { firstName, lastName, dob, skills } = data;
-        const astromanExists = await this.commonService.astromanExists(firstName, lastName, dob, id);
+        const astromanExists = await this.commonService.astromanExists(
+            firstName,
+            lastName,
+            dob,
+            id,
+        );
         if (astromanExists) {
             res.status(400);
             return getAstromanExistsErrorMessage();
         }
-        
-        const response =  await this.editAstromanService.editAstroman(id, firstName, lastName, dob, skills);
+
+        const response = await this.editAstromanService.editAstroman(
+            id,
+            firstName,
+            lastName,
+            dob,
+            skills,
+        );
         if (response === 'unchanged') {
-            return {status: 'no change in astroman detected, nothig was saved', itemId: id};
+            return {
+                status: 'no change in astroman detected, nothig was saved',
+                itemId: id,
+            };
         } else if (response === 'saved') {
-            return {status: 'changes in astroman were successfully saved', itemId: id};
+            return {
+                status: 'changes in astroman were successfully saved',
+                itemId: id,
+            };
         } else {
             throw new Error('unknow reponse on item edit');
         }

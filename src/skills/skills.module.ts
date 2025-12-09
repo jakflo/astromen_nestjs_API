@@ -6,7 +6,7 @@ import DbModule from '../db/db.module';
 @Module({
     imports: [DbModule],
     controllers: [SkillsController],
-    providers: [SkillsService], 
+    providers: [SkillsService],
     exports: [SkillsService],
 })
 export default class SkillsModule {}

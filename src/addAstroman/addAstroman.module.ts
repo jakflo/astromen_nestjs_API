@@ -7,7 +7,12 @@ import SkillsModule from '../skills/skills.module';
 import CrudLoggerModule from '../crudLogger/crudLogger.module';
 
 @Module({
-    imports: [DbModule, AddOrEditAstromanCommonModule, SkillsModule, CrudLoggerModule],
+    imports: [
+        DbModule,
+        AddOrEditAstromanCommonModule,
+        SkillsModule,
+        CrudLoggerModule,
+    ],
     controllers: [AddAstromanController],
     providers: [AddAstromanService],
 })

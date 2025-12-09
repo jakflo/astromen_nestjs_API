@@ -9,16 +9,12 @@ type SkillsListItem = {
 
 @Injectable()
 export default class SkillsService {
-    constructor(
-        private readonly db: DbService,
-    ) {}
+    constructor(private readonly db: DbService) {}
 
     async getSkillsList(): Promise<SkillsListItem[]> {
-        return <SkillsListItem[]>await this.db
-            .knex('skill')
-            .select('id', 'name')
-            .orderBy('id')
-        ;
+        return <SkillsListItem[]>(
+            await this.db.knex('skill').select('id', 'name').orderBy('id')
+        );
     }
 
     //existuji vsechny zaznamy v tab skill s id dle skillsId: number[]
@@ -26,7 +22,7 @@ export default class SkillsService {
         if (!Array.isArray(skillsId) || skillsId.length === 0) {
             throw new Error('skillsId must be array a cant be empty');
         }
-        
+
         const itemsCount = (
             await this.db
                 .knex('skill')
@@ -52,24 +48,30 @@ export default class SkillsService {
         await this.db
             .knex('astroman_has_skill')
             .where('astroman_id', itemId)
-            .del()
-        ;
+            .del();
     }
 
-    async skillsAreChanged(astromanId: number, skillsId: number[]): Promise<boolean> {
-        type SkillType = {skill_id: number};
-        const skillsInAstromanRecord = (await this.db
-            .knex('astroman_has_skill')
-            .select('skill_id')
-            .where<SkillType[]>('astroman_id', astromanId)
+    async skillsAreChanged(
+        astromanId: number,
+        skillsId: number[],
+    ): Promise<boolean> {
+        type SkillType = { skill_id: number };
+        const skillsInAstromanRecord = (
+            await this.db
+                .knex('astroman_has_skill')
+                .select('skill_id')
+                .where<SkillType[]>('astroman_id', astromanId)
         ).map((skillItem: SkillType) => {
             return skillItem.skill_id;
         });
-        
+
         skillsInAstromanRecord.sort();
         const skillsIdSorted = [].concat(skillsId);
         skillsIdSorted.sort();
 
-        return JSON.stringify(skillsInAstromanRecord) !== JSON.stringify(skillsIdSorted);
+        return (
+            JSON.stringify(skillsInAstromanRecord) !==
+            JSON.stringify(skillsIdSorted)
+        );
     }
 }

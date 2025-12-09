@@ -9,7 +9,7 @@ type Crud = 'c' | 'r' | 'u' | 'd';
 export default class CrudLoggerService {
     constructor(
         private readonly db: DbService,
-        private readonly crudLoggerTable: CrudLoggerTable
+        private readonly crudLoggerTable: CrudLoggerTable,
     ) {}
 
     async log(crud: Crud, tableName: string, itemId: number) {

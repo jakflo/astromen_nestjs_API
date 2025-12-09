@@ -5,7 +5,7 @@ const db = {
         user: 'root',
         password: 'mysql',
         database: 'astromen_nestjs',
-  },
+    },
 };
 
 const itemsPerPage = 15;

@@ -34,7 +34,7 @@ type AstromanRecord = AstromanRecordWoSkills & {
 export default class GetAstromenService {
     constructor(
         private readonly db: DbService,
-        private readonly paginatorHelper: PaginatorHelper
+        private readonly paginatorHelper: PaginatorHelper,
     ) {}
 
     async getAstromen(page: number, itemsPerPage: number) {
@@ -68,31 +68,37 @@ export default class GetAstromenService {
             return item.id;
         });
 
-        const [resultRaw] = await this.db.knex.raw(
+        const [resultRaw] = (await this.db.knex.raw(
             `SELECT a.*, s.id AS skill_id, s.name as skill_name 
             FROM astroman a 
             JOIN astroman_has_skill ahs ON a.id = ahs.astroman_id 
             JOIN skill s ON ahs.skill_id = s.id 
             WHERE a.id IN(?) 
-            ORDER BY a.id`, 
-            [idsInPage]
-        ) as Array<Array<AstromanWithSkillListDbRecord>>;
+            ORDER BY a.id`,
+            [idsInPage],
+        )) as Array<Array<AstromanWithSkillListDbRecord>>;
 
         const itemsInPage = this.getItemsFromRawRecords(resultRaw);
         return { itemsCount, pagesCount, page, itemsInPage };
     }
-    
-    private getItemsFromRawRecords(rawRecords: AstromanWithSkillListDbRecord[]): AstromanRecord[] {
-        const recordIdsWithDoops = rawRecords.map((record: AstromanWithSkillListDbRecord) => {
-            return record.id
-        });
+
+    private getItemsFromRawRecords(
+        rawRecords: AstromanWithSkillListDbRecord[],
+    ): AstromanRecord[] {
+        const recordIdsWithDoops = rawRecords.map(
+            (record: AstromanWithSkillListDbRecord) => {
+                return record.id;
+            },
+        );
         const recordIds = [...new Set(recordIdsWithDoops)];
         const output: AstromanRecord[] = [];
-        
+
         for (const id of recordIds) {
-            const recordsWithId = rawRecords.filter((record: AstromanWithSkillListDbRecord) => {
-                return record.id === id;
-            });
+            const recordsWithId = rawRecords.filter(
+                (record: AstromanWithSkillListDbRecord) => {
+                    return record.id === id;
+                },
+            );
 
             const recordWoSkillsRaw = recordsWithId[0];
             const recordWoSkills: AstromanRecordWoSkills = {
@@ -102,16 +108,18 @@ export default class GetAstromenService {
                 dob: formateDateToIso(recordWoSkillsRaw.DOB),
             };
 
-            const skillForRecord = recordsWithId.map((record: AstromanWithSkillListDbRecord) => {
-                return {
-                    id: record.skill_id,
-                    name: record.skill_name,
-                };
-            });
+            const skillForRecord = recordsWithId.map(
+                (record: AstromanWithSkillListDbRecord) => {
+                    return {
+                        id: record.skill_id,
+                        name: record.skill_name,
+                    };
+                },
+            );
 
             output.push({
-                ...recordWoSkills, 
-                skills: skillForRecord
+                ...recordWoSkills,
+                skills: skillForRecord,
             });
         }
 

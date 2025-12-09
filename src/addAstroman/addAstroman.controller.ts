@@ -13,15 +13,27 @@ export default class AddAstromanController {
     ) {}
 
     @Post('/newAstroman')
-    async addAstroman(@Body() data: AstromanItemDto, @Res({ passthrough: true }) res: Response) {
+    async addAstroman(
+        @Body() data: AstromanItemDto,
+        @Res({ passthrough: true }) res: Response,
+    ) {
         const { firstName, lastName, dob, skills } = data;
-        const astromanExists = await this.commonService.astromanExists(firstName, lastName, dob);
+        const astromanExists = await this.commonService.astromanExists(
+            firstName,
+            lastName,
+            dob,
+        );
         if (astromanExists) {
             res.status(400);
             return getAstromanExistsErrorMessage();
         }
-        
-        const newItemId = await this.addAstromanService.addAstroman(firstName, lastName, dob, skills);
-        return {status: 'new astroman inserted', newItemId};
+
+        const newItemId = await this.addAstromanService.addAstroman(
+            firstName,
+            lastName,
+            dob,
+            skills,
+        );
+        return { status: 'new astroman inserted', newItemId };
     }
 }

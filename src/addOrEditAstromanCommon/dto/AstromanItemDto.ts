@@ -13,14 +13,14 @@ import skillsExist from '../validator/skillsExist';
 export default class AstromanItemDto {
     @IsString()
     @Transform(({ value }: { value: string }) =>
-        typeof value === 'string' ? value.trim() : value
+        typeof value === 'string' ? value.trim() : value,
     )
     @Length(1, 32)
     firstName: string;
 
     @IsString()
     @Transform(({ value }: { value: string }) =>
-        typeof value === 'string' ? value.trim() : value
+        typeof value === 'string' ? value.trim() : value,
     )
     @Length(1, 32)
     lastName: string;
