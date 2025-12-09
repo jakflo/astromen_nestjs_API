@@ -3,12 +3,14 @@ import DbService from '../db/db.service';
 import SkillsService from '../skills/skills.service';
 import type { AstromanDbRecord } from '../getAstromen/getAstromen.service';
 import { formateDateToIso } from '../utils/dateTools';
+import CrudLoggerService from '../crudLogger/crudLogger.service';
 
 @Injectable()
 export default class EditAstromanService {
     constructor(
         private readonly db: DbService,
-        private readonly skillsService: SkillsService
+        private readonly skillsService: SkillsService,
+        private readonly crudLoggerService: CrudLoggerService
     ) {}
 
     async editAstroman(
@@ -52,6 +54,7 @@ export default class EditAstromanService {
            await this.skillsService.addSkillsToAstroman(id, skills);
         }
 
+        await this.crudLoggerService.log('u', 'astroman', id);
         return 'saved';
     }
 }

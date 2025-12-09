@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import DbService from '../db/db.service';
 import SkillsService from '../skills/skills.service';
+import CrudLoggerService from '../crudLogger/crudLogger.service';
 
 @Injectable()
 export default class AddAstromanService {
     constructor(
         private readonly db: DbService,
-        private readonly skillsService: SkillsService
+        private readonly skillsService: SkillsService, 
+        private readonly crudLoggerService: CrudLoggerService
     ) {}
 
     async addAstroman(
@@ -25,6 +27,7 @@ export default class AddAstromanService {
         ) as number[];
         
         await this.skillsService.addSkillsToAstroman(newItemId, skills);
+        await this.crudLoggerService.log('c', 'astroman', newItemId);
         return newItemId;
     }
 }

@@ -5,4 +5,17 @@ function formateDateToIso(date: Date): string {
     return `${y}-${m}-${d}`;
 }
 
-export { formateDateToIso };
+function formateDateToIsoDateTime(date: Date): string {
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
+    const s = String(date.getSeconds()).padStart(2, '0');
+    const isoDate = formateDateToIso(date);
+    return `${isoDate} ${h}:${m}:${s}`;
+}
+
+function currentIsoDateTime(): string {
+    const date = new Date();
+    return formateDateToIsoDateTime(date);
+}
+
+export { formateDateToIso, formateDateToIsoDateTime, currentIsoDateTime };
