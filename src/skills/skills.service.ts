@@ -11,12 +11,6 @@ type SkillsListItem = {
 export default class SkillsService {
     constructor(private readonly db: DbService) {}
 
-    async getSkillsList(): Promise<SkillsListItem[]> {
-        return <SkillsListItem[]>(
-            await this.db.knex('skill').select('id', 'name').orderBy('id')
-        );
-    }
-
     //existuji vsechny zaznamy v tab skill s id dle skillsId: number[]
     async allSkillsExist(skillsId: number[]): Promise<boolean> {
         if (!Array.isArray(skillsId) || skillsId.length === 0) {
@@ -74,4 +68,26 @@ export default class SkillsService {
             JSON.stringify(skillsIdSorted)
         );
     }
+
+    async skillNameIsUsed(
+        name: string,
+        exceptId: number | null = null,
+    ): Promise<boolean> {
+        const itemsCount = (
+            await this.db
+                .knex('skill')
+                .count({ count: '*' })
+                .where('name', name)
+                .modify((builder) => {
+                    if (exceptId !== null) {
+                        builder.whereNot('id', exceptId);
+                    }
+                })
+                .first<RecordCountType>()
+        ).count;
+
+        return itemsCount > 0;
+    }
 }
+
+export type { SkillsListItem };

@@ -4,15 +4,21 @@ import GetAstromenModule from './getAstromen/getAstromen.module';
 import AddAstromanModule from './addAstroman/addAstroman.module';
 import EditAstromanModule from './editAstroman/editAstroman.module';
 import DeleteAstromanModule from './deleteAstroman/deleteAstroman.module';
-import SkillsModule from './skills/skills.module';
+import GetSkillsModule from './getSkills/getSkills.module';
+import AddSkillModule from './addSkill/addSkill.module';
+import EditSkillModule from './editSkill/editSkill.module';
+import DeleteSkillModule from './deleteSkill/deleteSkill.module';
 
 @Module({
     imports: [
         GetAstromenModule,
         AddAstromanModule,
         EditAstromanModule,
-        SkillsModule,
         DeleteAstromanModule,
+        GetSkillsModule,
+        AddSkillModule,
+        EditSkillModule,
+        DeleteSkillModule,
     ],
     controllers: [AppController],
     providers: [],
