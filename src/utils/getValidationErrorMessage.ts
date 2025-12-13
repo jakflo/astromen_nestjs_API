@@ -35,7 +35,9 @@ function getSkillIdNotFoundErrorMessage(id: number): ValidationError {
 }
 
 function getSkillAllreadyUsedErrorMessage(id: number): ValidationError {
-    return getBadRequestError(`Cannot delete skill id ${id}, it is allready used`);
+    return getBadRequestError(
+        `Cannot delete skill id ${id}, it is allready used`,
+    );
 }
 
 export {
