@@ -3,14 +3,15 @@ import DbService from '../db/db.service';
 import SkillsService from '../skills/skills.service';
 import type { AstromanDbRecord } from '../getAstromen/getAstromen.service';
 import { formateDateToIso } from '../utils/dateTools';
-import CrudLoggerService from '../crudLogger/crudLogger.service';
+import type { AddOrEditAstromanEvent } from '../addOrEditAstromanCommon/event/AddOrEditAstromanEvent';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export default class EditAstromanService {
     constructor(
         private readonly db: DbService,
         private readonly skillsService: SkillsService,
-        private readonly crudLoggerService: CrudLoggerService,
+        private eventEmitter: EventEmitter2,
     ) {}
 
     async editAstroman(
@@ -50,7 +51,12 @@ export default class EditAstromanService {
             await this.skillsService.addSkillsToAstroman(id, skills);
         }
 
-        await this.crudLoggerService.log('u', 'astroman', id);
+        const event: AddOrEditAstromanEvent = {
+            itemId: id,
+            data: { firstName, lastName, dob, skills },
+        };
+        await this.eventEmitter.emitAsync('astroman.edited', event);
+
         return 'saved';
     }
 }

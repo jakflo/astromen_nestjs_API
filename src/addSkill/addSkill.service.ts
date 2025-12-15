@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import DbService from '../db/db.service';
-import CrudLoggerService from '../crudLogger/crudLogger.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AddOrEditSkillEvent } from '../skills/event/AddOrEditSkillEvent';
 
 @Injectable()
 export default class AddSkillService {
     constructor(
         private readonly db: DbService,
-        private readonly crudLoggerService: CrudLoggerService,
+        private eventEmitter: EventEmitter2,
     ) {}
 
     async addSkill(name: string): Promise<number> {
@@ -14,7 +15,14 @@ export default class AddSkillService {
             .knex('skill')
             .insert({ name }, ['id'])) as number[];
 
-        await this.crudLoggerService.log('c', 'skill', newItemId);
+        const event: AddOrEditSkillEvent = {
+            skillId: newItemId,
+            data: {
+                name,
+            },
+        };
+        await this.eventEmitter.emitAsync('skill.created', event);
+
         return newItemId;
     }
 }

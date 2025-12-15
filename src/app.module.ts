@@ -8,6 +8,8 @@ import GetSkillsModule from './getSkills/getSkills.module';
 import AddSkillModule from './addSkill/addSkill.module';
 import EditSkillModule from './editSkill/editSkill.module';
 import DeleteSkillModule from './deleteSkill/deleteSkill.module';
+import CrudLoggerModule from './crudLogger/crudLogger.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
     imports: [
@@ -19,6 +21,8 @@ import DeleteSkillModule from './deleteSkill/deleteSkill.module';
         AddSkillModule,
         EditSkillModule,
         DeleteSkillModule,
+        CrudLoggerModule,
+        EventEmitterModule.forRoot(),
     ],
     controllers: [AppController],
     providers: [],

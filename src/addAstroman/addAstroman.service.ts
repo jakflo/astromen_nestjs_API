@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import DbService from '../db/db.service';
 import SkillsService from '../skills/skills.service';
-import CrudLoggerService from '../crudLogger/crudLogger.service';
+import type { AddOrEditAstromanEvent } from '../addOrEditAstromanCommon/event/AddOrEditAstromanEvent';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export default class AddAstromanService {
     constructor(
         private readonly db: DbService,
         private readonly skillsService: SkillsService,
-        private readonly crudLoggerService: CrudLoggerService,
+        private eventEmitter: EventEmitter2,
     ) {}
 
     async addAstroman(
@@ -27,7 +28,13 @@ export default class AddAstromanService {
         )) as number[];
 
         await this.skillsService.addSkillsToAstroman(newItemId, skills);
-        await this.crudLoggerService.log('c', 'astroman', newItemId);
+
+        const event: AddOrEditAstromanEvent = {
+            itemId: newItemId,
+            data: { firstName, lastName, dob, skills },
+        };
+        await this.eventEmitter.emitAsync('astroman.created', event);
+
         return newItemId;
     }
 }
