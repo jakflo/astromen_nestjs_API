@@ -40,7 +40,7 @@ export default class EditAstromanService {
         }
 
         if (basicDataChanged) {
-            await conn.where('id', id).update({
+            await conn('astroman').where('id', id).update({
                 first_name: firstName,
                 last_name: lastName,
                 DOB: dob,
