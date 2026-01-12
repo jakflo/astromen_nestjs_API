@@ -11,7 +11,7 @@ export default class SkillsExistValidator implements ValidatorConstraintInterfac
     constructor(private readonly skillsService: SkillsService) {}
 
     async validate(values: number[]) {
-        if (!Array.isArray(values)) return false;
+        if (!Array.isArray(values) || values.length === 0) return false;
         return await this.skillsService.allSkillsExist(values);
     }
 
