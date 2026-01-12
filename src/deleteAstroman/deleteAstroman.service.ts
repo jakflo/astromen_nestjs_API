@@ -13,8 +13,10 @@ export default class DeleteAstromanService {
     ) {}
 
     async deleteAstroman(id: number) {
+        const conn = this.db.getConn();
+
         await this.skillsService.removeSkillsFromAstroman(id);
-        await this.db.knex('astroman').where('id', id).del();
+        await conn('astroman').where('id', id).del();
 
         const event: DeleteAstromanEvent = { itemId: id };
         await this.eventEmitter.emitAsync('astroman.deleted', event);

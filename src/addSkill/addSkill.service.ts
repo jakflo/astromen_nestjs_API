@@ -11,9 +11,11 @@ export default class AddSkillService {
     ) {}
 
     async addSkill(name: string): Promise<number> {
-        const [newItemId] = (await this.db
-            .knex('skill')
-            .insert({ name }, ['id'])) as number[];
+        const conn = this.db.getConn();
+
+        const [newItemId] = (await 
+            conn('skill')
+            .insert({ name })) as number[];
 
         const event: AddOrEditSkillEvent = {
             skillId: newItemId,

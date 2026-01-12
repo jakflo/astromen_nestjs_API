@@ -21,8 +21,9 @@ export default class EditAstromanService {
         dob: string,
         skills: number[],
     ): Promise<'saved' | 'unchanged'> {
-        const oldItem = await this.db
-            .knex('astroman')
+        const conn = this.db.getConn();
+
+        const oldItem = await conn('astroman')
             .where('id', id)
             .first<AstromanDbRecord>();
         const basicDataChanged =
@@ -39,7 +40,7 @@ export default class EditAstromanService {
         }
 
         if (basicDataChanged) {
-            await this.db.knex('astroman').where('id', id).update({
+            await conn.where('id', id).update({
                 first_name: firstName,
                 last_name: lastName,
                 DOB: dob,

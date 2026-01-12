@@ -7,8 +7,10 @@ export default class GetSkillsService {
     constructor(private readonly db: DbService) {}
 
     async getSkillsList(): Promise<SkillsListItem[]> {
+        const conn = this.db.getConn();
+
         return <SkillsListItem[]>(
-            await this.db.knex('skill').select('id', 'name').orderBy('id')
+            await conn('skill').select('id', 'name').orderBy('id')
         );
     }
 }

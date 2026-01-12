@@ -11,7 +11,9 @@ export default class DeleteSkillService {
     ) {}
 
     async deleteSkill(id: number) {
-        await this.db.knex('skill').where('id', id).del();
+        const conn = this.db.getConn();
+
+        await conn('skill').where('id', id).del();
 
         const event: DeleteSkillEvent = {
             skillId: id,

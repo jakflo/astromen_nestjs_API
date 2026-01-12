@@ -12,9 +12,10 @@ export default class AddOrEditAstromanCommonService {
         dob: string,
         exceptId: number | null = null, // s vyjimkou astronauta s timto id (napr. id editovane polozky)
     ): Promise<boolean> {
+        const conn = this.db.getConn();
+
         const itemsCount = (
-            await this.db
-                .knex('astroman')
+            await conn('astroman')
                 .count({ count: '*' })
                 .where('first_name', firstName)
                 .andWhere('last_name', lastName)

@@ -13,13 +13,14 @@ export default class SkillsService {
 
     //existuji vsechny zaznamy v tab skill s id dle skillsId: number[]
     async allSkillsExist(skillsId: number[]): Promise<boolean> {
+        const conn = this.db.getConn();
+
         if (!Array.isArray(skillsId) || skillsId.length === 0) {
             throw new Error('skillsId must be array a cant be empty');
         }
 
         const itemsCount = (
-            await this.db
-                .knex('skill')
+            await conn('skill')
                 .count<RecordCountType>({ count: '*' })
                 .whereIn('id', skillsId)
                 .first()
@@ -35,12 +36,13 @@ export default class SkillsService {
                 skill_id: skill,
             };
         });
-        await this.db.knex.batchInsert('astroman_has_skill', rows);
+        await this.db.getConn().batchInsert('astroman_has_skill', rows);
     }
 
     async removeSkillsFromAstroman(itemId: number) {
-        await this.db
-            .knex('astroman_has_skill')
+        const conn = this.db.getConn();
+
+        await conn('astroman_has_skill')
             .where('astroman_id', itemId)
             .del();
     }
@@ -49,10 +51,11 @@ export default class SkillsService {
         astromanId: number,
         skillsId: number[],
     ): Promise<boolean> {
+        const conn = this.db.getConn();
+
         type SkillType = { skill_id: number };
         const skillsInAstromanRecord = (
-            await this.db
-                .knex('astroman_has_skill')
+            await conn('astroman_has_skill')
                 .select('skill_id')
                 .where<SkillType[]>('astroman_id', astromanId)
         ).map((skillItem: SkillType) => {
@@ -73,9 +76,10 @@ export default class SkillsService {
         name: string,
         exceptId: number | null = null,
     ): Promise<boolean> {
+        const conn = this.db.getConn();
+
         const itemsCount = (
-            await this.db
-                .knex('skill')
+            await conn('skill')
                 .count({ count: '*' })
                 .where('name', name)
                 .modify((builder) => {

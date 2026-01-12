@@ -12,8 +12,9 @@ export default class EditSkillService {
     ) {}
 
     async editSkill(id: number, name: string): Promise<'saved' | 'unchanged'> {
-        const oldItem = await this.db
-            .knex('skill')
+        const conn = this.db.getConn();
+
+        const oldItem = await conn('skill')
             .select('id', 'name')
             .where('id', id)
             .first<SkillsListItem>();
@@ -23,7 +24,7 @@ export default class EditSkillService {
             return 'unchanged';
         }
 
-        await this.db.knex('skill').where('id', id).update({ name });
+        await conn('skill').where('id', id).update({ name });
 
         const event: AddOrEditSkillEvent = {
             skillId: id,

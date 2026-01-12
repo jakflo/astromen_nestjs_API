@@ -5,6 +5,14 @@ import { currentIsoDateTime } from '../utils/dateTools';
 
 type Crud = 'c' | 'r' | 'u' | 'd';
 
+type CrudLoggerRecord = {
+    id: number;
+    crud: Crud;
+    table_id: number;
+    item_id: number;
+    date: Date;
+};
+
 @Injectable()
 export default class CrudLoggerService {
     constructor(
@@ -13,8 +21,10 @@ export default class CrudLoggerService {
     ) {}
 
     async log(crud: Crud, tableName: string, itemId: number) {
+        const conn = this.db.getConn();
+
         const tableId = await this.crudLoggerTable.getTableId(tableName);
-        await this.db.knex('crud_logger').insert({
+        await conn('crud_logger').insert({
             crud,
             table_id: tableId,
             item_id: itemId,
@@ -22,3 +32,5 @@ export default class CrudLoggerService {
         });
     }
 }
+
+export type { Crud, CrudLoggerRecord };

@@ -38,13 +38,14 @@ export default class GetAstromenService {
     ) {}
 
     async getAstromen(page: number, itemsPerPage: number) {
+        const conn = this.db.getConn();
+        
         const { limit, offset } = this.paginatorHelper.getLimitAndOffset(
             page,
             itemsPerPage,
         );
         const itemsCount = (
-            await this.db
-                .knex('astroman')
+            await conn('astroman')
                 .count<RecordCountType>({ count: '*' })
                 .first()
         ).count;
@@ -58,8 +59,7 @@ export default class GetAstromenService {
         }
 
         const idsInPage = (
-            await this.db
-                .knex('astroman')
+            await conn('astroman')
                 .select('id')
                 .limit(limit)
                 .offset(offset)
@@ -68,7 +68,7 @@ export default class GetAstromenService {
             return item.id;
         });
 
-        const [resultRaw] = (await this.db.knex.raw(
+        const [resultRaw] = (await conn.raw(
             `SELECT a.*, s.id AS skill_id, s.name as skill_name 
             FROM astroman a 
             JOIN astroman_has_skill ahs ON a.id = ahs.astroman_id 

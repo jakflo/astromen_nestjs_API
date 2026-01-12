@@ -29,8 +29,10 @@ export default class CrudLoggerTable {
     }
 
     async setTables() {
-        this.tables = await this.db
-            .knex('crud_logger_table')
+        const conn = this.db.getConn();
+
+        this.tables = await 
+            conn('crud_logger_table')
             .select('id', 'name');
     }
 }

@@ -9,10 +9,35 @@ type RecordCountType = {
 
 @Injectable()
 export default class DbService {
-    knex: Knex;
+    private knex: Knex;
+    private trx: Knex.Transaction;
+    private inTransaction: boolean = false;
 
     constructor() {
         this.knex = knexConstructor(db);
+    }
+
+    getConn(): Knex | Knex.Transaction {
+        if (this.inTransaction) {
+            return this.trx;
+        } else {
+            return this.knex;
+        }
+    }
+
+    async startTransaction() {
+        this.trx = await this.knex.transaction();
+        this.inTransaction = true;
+    }
+
+    async endTransaction(commit: boolean) {
+        if (commit) {
+            await this.trx.commit();
+        } else {
+            await this.trx.rollback();
+        }
+
+        this.inTransaction = false;
     }
 
     async recordExists(
@@ -20,8 +45,9 @@ export default class DbService {
         columnName: string,
         value: number | string,
     ): Promise<boolean> {
+        const conn = this.getConn();
         const count = (
-            await this.knex(tableName)
+            await conn(tableName)
                 .where(columnName, value)
                 .count<RecordCountType>({ count: '*' })
                 .first()
