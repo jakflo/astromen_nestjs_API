@@ -24,7 +24,7 @@ export default class AstromanItemDto {
     )
     @Length(1, 32)
     lastName: string;
-    
+
     @IsRealDate({ message: 'incorrect date' })
     dob: string;
 

@@ -43,11 +43,19 @@ describe('AddSkill (e2e)', () => {
         const name = 'skill_1';
         const newSkillId = await addSkill(name, app);
 
-        const newSkillRecords = await conn('skill').where<SkillsListItem[]>('name', name);
+        const newSkillRecords = await conn('skill').where<SkillsListItem[]>(
+            'name',
+            name,
+        );
         expect(newSkillRecords).toHaveLength(1);
         expect(newSkillId).toEqual(newSkillRecords[0]['id']);
-        
-        const crudLoggerRecords = await getCrudLoggerRecords(newSkillRecords[0]['id'], 'c', 'skill', conn);
+
+        const crudLoggerRecords = await getCrudLoggerRecords(
+            newSkillRecords[0]['id'],
+            'c',
+            'skill',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(1);
     });
 
@@ -65,21 +73,29 @@ describe('AddSkill (e2e)', () => {
     it('/addSkill (validator)', async () => {
         await testAddSkill('skill_1', 201, app);
         await testAddSkill('skill_2', 201, app);
-        
+
         //chybejici nebo prazdne jmeno
         await testAddSkill(null, 400, app);
         await testAddSkill('  ', 400, app);
-        
+
         //po druhe stejne jmeno, musi selhat
         await testAddSkill('skill_2', 400, app);
 
         //prilis dlouhe jmeno
-        await testAddSkill('skill_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog_name', 400, app);
+        await testAddSkill(
+            'skill_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog_name',
+            400,
+            app,
+        );
     });
 });
 
-async function testAddSkill(name: string | null, expectedCode: number, app: INestApplication) {
-    let data: {name?: string};
+async function testAddSkill(
+    name: string | null,
+    expectedCode: number,
+    app: INestApplication,
+) {
+    let data: { name?: string };
     if (name === null) {
         data = {};
     } else {
@@ -89,6 +105,5 @@ async function testAddSkill(name: string | null, expectedCode: number, app: INes
     await request(app.getHttpServer())
         .post('/addSkill')
         .send(data)
-        .expect(expectedCode)
-    ;
+        .expect(expectedCode);
 }

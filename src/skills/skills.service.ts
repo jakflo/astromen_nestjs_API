@@ -41,10 +41,7 @@ export default class SkillsService {
 
     async removeSkillsFromAstroman(itemId: number) {
         const conn = this.db.getConn();
-
-        await conn('astroman_has_skill')
-            .where('astroman_id', itemId)
-            .del();
+        await conn('astroman_has_skill').where('astroman_id', itemId).del();
     }
 
     async skillsAreChanged(

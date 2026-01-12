@@ -19,13 +19,11 @@ export default class AddAstromanService {
         skills: number[],
     ): Promise<number> {
         const conn = this.db.getConn();
-        const [newItemId] = (await conn('astroman').insert(
-            {
-                first_name: firstName,
-                last_name: lastName,
-                DOB: dob,
-            },            
-        )) as number[];
+        const [newItemId] = (await conn('astroman').insert({
+            first_name: firstName,
+            last_name: lastName,
+            DOB: dob,
+        })) as number[];
 
         await this.skillsService.addSkillsToAstroman(newItemId, skills);
 

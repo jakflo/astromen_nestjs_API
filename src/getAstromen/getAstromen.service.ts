@@ -39,7 +39,7 @@ export default class GetAstromenService {
 
     async getAstromen(page: number, itemsPerPage: number) {
         const conn = this.db.getConn();
-        
+
         const { limit, offset } = this.paginatorHelper.getLimitAndOffset(
             page,
             itemsPerPage,

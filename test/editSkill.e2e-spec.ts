@@ -48,24 +48,33 @@ describe('AddSkill (e2e)', () => {
             .expect(200)
             .expect({
                 status: 'skill edited',
-                id: skillId_2
-            })
-        ;
+                id: skillId_2,
+            });
         await request(app.getHttpServer())
             .put(`/editSkill/${skillId_2}`)
             .send({ name: 'skill_2b' })
             .expect(200)
             .expect({
                 status: 'no change in skill detected, nothig was saved',
-                id: skillId_2
-            })
-        ;
+                id: skillId_2,
+            });
 
-        const crudLoggerRecords = await getCrudLoggerRecords(skillId_2, 'u', 'skill', conn);
+        const crudLoggerRecords = await getCrudLoggerRecords(
+            skillId_2,
+            'u',
+            'skill',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(1);
 
-        const skillRecord_1 = await conn('skill').where<SkillsListItem[]>('id', skillId_1);
-        const skillRecord_2 = await conn('skill').where<SkillsListItem[]>('id', skillId_2);
+        const skillRecord_1 = await conn('skill').where<SkillsListItem[]>(
+            'id',
+            skillId_1,
+        );
+        const skillRecord_2 = await conn('skill').where<SkillsListItem[]>(
+            'id',
+            skillId_2,
+        );
         expect(skillRecord_1[0].name).toEqual('skill_1');
         expect(skillRecord_2[0].name).toEqual('skill_2b');
     });
@@ -83,7 +92,12 @@ describe('AddSkill (e2e)', () => {
         await testEditSkill(skillId_1, ' ', 400, app);
 
         //prilis dlouhe jmeno
-        await testEditSkill(skillId_1, 'skill_too_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong', 400, app);
+        await testEditSkill(
+            skillId_1,
+            'skill_too_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong',
+            400,
+            app,
+        );
 
         //pouzite jmeno
         await testEditSkill(skillId_1, 'skill_2', 400, app);
@@ -97,12 +111,12 @@ describe('AddSkill (e2e)', () => {
 });
 
 async function testEditSkill(
-    id: number, 
-    name: string | null, 
-    expectedCode: number, 
-    app: INestApplication
+    id: number,
+    name: string | null,
+    expectedCode: number,
+    app: INestApplication,
 ) {
-    let data: {name?: string};
+    let data: { name?: string };
     if (name === null) {
         data = {};
     } else {
@@ -112,6 +126,5 @@ async function testEditSkill(
     await request(app.getHttpServer())
         .put(`/editSkill/${id}`)
         .send(data)
-        .expect(expectedCode)
-    ;
+        .expect(expectedCode);
 }

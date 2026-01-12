@@ -31,8 +31,6 @@ export default class CrudLoggerTable {
     async setTables() {
         const conn = this.db.getConn();
 
-        this.tables = await 
-            conn('crud_logger_table')
-            .select('id', 'name');
+        this.tables = await conn('crud_logger_table').select('id', 'name');
     }
 }

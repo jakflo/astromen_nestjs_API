@@ -6,7 +6,7 @@ type dbType = {
         password: string;
         database: string;
     };
-    pool?: {min: number; max: number}
+    pool?: { min: number; max: number };
 };
 
 const db: dbType = {

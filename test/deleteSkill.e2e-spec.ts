@@ -48,16 +48,26 @@ describe('DeleteSkill (e2e)', () => {
             .expect(200)
             .expect({
                 status: 'skill deleted',
-                id: skillId_2
-            })
-        ;
+                id: skillId_2,
+            });
 
-        const skillRecord_1 = await conn('skill').where<SkillsListItem[]>('id', skillId_1);
-        const skillRecord_2 = await conn('skill').where<SkillsListItem[]>('id', skillId_2);
+        const skillRecord_1 = await conn('skill').where<SkillsListItem[]>(
+            'id',
+            skillId_1,
+        );
+        const skillRecord_2 = await conn('skill').where<SkillsListItem[]>(
+            'id',
+            skillId_2,
+        );
         expect(skillRecord_1).toHaveLength(1);
         expect(skillRecord_2).toHaveLength(0);
 
-        const crudLoggerRecords = await getCrudLoggerRecords(skillId_2, 'd', 'skill', conn);
+        const crudLoggerRecords = await getCrudLoggerRecords(
+            skillId_2,
+            'd',
+            'skill',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(1);
     });
 
@@ -68,20 +78,22 @@ describe('DeleteSkill (e2e)', () => {
 
         // neexistujici id
         await testDeleteSkill(wrongSkillId, 404, app);
-        
+
         // pokus o smazani jit pouzite dovednosti
         await addAstroman('f1', 'l1', '1988-08-08', [skillId_1], app);
         await testDeleteSkill(skillId_1, 400, app);
 
         await testDeleteSkill(skillId_2, 200, app);
     });
-
 });
 
-async function testDeleteSkill(skillId: number, expectedCode: number, app: INestApplication) {
+async function testDeleteSkill(
+    skillId: number,
+    expectedCode: number,
+    app: INestApplication,
+) {
     await request(app.getHttpServer())
         .delete(`/deleteSkill/${skillId}`)
         .send()
-        .expect(expectedCode)
-    ;
+        .expect(expectedCode);
 }
