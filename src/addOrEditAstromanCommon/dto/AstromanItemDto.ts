@@ -1,7 +1,6 @@
 import {
     IsString,
     Length,
-    IsDateString,
     IsArray,
     ArrayMinSize,
     IsInt,
@@ -9,6 +8,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import skillsExist from '../validator/skillsExist';
+import IsRealDate from '../../commonDto/validator/IsRealDate';
 
 export default class AstromanItemDto {
     @IsString()
@@ -24,8 +24,8 @@ export default class AstromanItemDto {
     )
     @Length(1, 32)
     lastName: string;
-
-    @IsDateString()
+    
+    @IsRealDate({ message: 'incorrect date' })
     dob: string;
 
     @IsArray()
