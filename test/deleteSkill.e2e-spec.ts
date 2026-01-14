@@ -1,48 +1,19 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
-import DbService from '../src/db/db.service';
-import { getCrudLoggerRecords, addAstroman, addSkill } from './tools';
-import auxSetup from '../src/mainAuxSetup';
+import { getCrudLoggerRecords, addAstroman, addSkill, deleteAstroman, setupTestApp, httpServerHelper } from './tools';
 import type { SkillsListItem } from '../src/skills/skills.service';
+import { TestContext } from './types';
 
 describe('DeleteSkill (e2e)', () => {
-    let app: INestApplication<App>;
-    let db: DbService;
-
-    beforeAll(async () => {
-        const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = moduleFixture.createNestApplication();
-        auxSetup(app);
-        await app.init();
-
-        db = moduleFixture.get(DbService);
-    });
-
-    afterAll(async () => {
-        await app.close();
-        await db.getConn().destroy();
-    });
-
-    beforeEach(async () => {
-        await db.startTransaction();
-    });
-
-    afterEach(async () => {
-        await db.endTransaction(false);
-    });
+    const ctx = {} as TestContext;
+    setupTestApp(ctx);
 
     it('/DeleteSkill', async () => {
-        const conn = db.getConn();
-        const skillId_1 = await addSkill('skill_1', app);
-        const skillId_2 = await addSkill('skill_2', app);
+        const conn = ctx.db.getConn();
+        const skillId_1 = await addSkill('skill_1', ctx.app);
+        const skillId_2 = await addSkill('skill_2', ctx.app);
 
-        await request(app.getHttpServer())
+        await request(httpServerHelper(ctx.app))
             .delete(`/deleteSkill/${skillId_2}`)
             .send()
             .expect(200)
@@ -72,18 +43,20 @@ describe('DeleteSkill (e2e)', () => {
     });
 
     it('/DeleteSkill (validator)', async () => {
-        const skillId_1 = await addSkill('skill_1', app);
-        const skillId_2 = await addSkill('skill_2', app);
+        const skillId_1 = await addSkill('skill_1', ctx.app);
+        const skillId_2 = await addSkill('skill_2', ctx.app);
         const wrongSkillId = skillId_1 + skillId_2;
 
         // neexistujici id
-        await testDeleteSkill(wrongSkillId, 404, app);
+        await testDeleteSkill(wrongSkillId, 404, ctx.app);
 
-        // pokus o smazani jit pouzite dovednosti
-        await addAstroman('f1', 'l1', '1988-08-08', [skillId_1], app);
-        await testDeleteSkill(skillId_1, 400, app);
+        // pokus o smazani jiz pouzite dovednosti
+        const newItemId =  await addAstroman('f1', 'l1', '1988-08-08', [skillId_1], ctx.app);
+        await testDeleteSkill(skillId_1, 400, ctx.app);
+        await deleteAstroman(newItemId, ctx.app);
+        await testDeleteSkill(skillId_1, 200, ctx.app);
 
-        await testDeleteSkill(skillId_2, 200, app);
+        await testDeleteSkill(skillId_2, 200, ctx.app);
     });
 });
 
@@ -92,7 +65,7 @@ async function testDeleteSkill(
     expectedCode: number,
     app: INestApplication,
 ) {
-    await request(app.getHttpServer())
+    await request(httpServerHelper(app))
         .delete(`/deleteSkill/${skillId}`)
         .send()
         .expect(expectedCode);

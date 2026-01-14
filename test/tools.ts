@@ -5,6 +5,44 @@ import type {
 } from '../src/crudLogger/crudLogger.service';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { Test } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import auxSetup from '../src/mainAuxSetup';
+import DbService from '../src/db/db.service';
+import { TestContext } from './types';
+import { Server } from 'http';
+
+//spolecne pro vsechny testy - iniciuje se app a db a kazda test se obali rollnutou transakci
+function setupTestApp(ctx: TestContext) {
+  beforeAll(async () => {
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    ctx.app = moduleFixture.createNestApplication();
+    auxSetup(ctx.app);
+    await ctx.app.init();
+
+    ctx.db = moduleFixture.get(DbService);
+  });
+
+  afterAll(async () => {
+    await ctx.app.close();
+    await ctx.db.getConn().destroy();
+  });
+
+  beforeEach(async () => {
+    await ctx.db.startTransaction();
+  });
+
+  afterEach(async () => {
+    await ctx.db.endTransaction(false);
+  });
+}
+
+function httpServerHelper(app: INestApplication): Server {
+  return app.getHttpServer() as Server;
+}
 
 async function getCrudLoggerRecords(
     tableId: number,
@@ -51,12 +89,19 @@ async function addAstroman(
     };
     const data = { firstName, lastName, dob, skills };
 
-    const resp = await request(app.getHttpServer())
+    const resp = await request(httpServerHelper(app))
         .post('/newAstroman')
         .send(data)
         .expect(201);
     const body = resp.body as respBody;
     return body.newItemId;
+}
+
+async function deleteAstroman(id: number, app: INestApplication) {
+    await request(httpServerHelper(app))
+        .delete(`/deleteAstroman/${id}`)
+        .send()
+        .expect(200);
 }
 
 async function addSkill(name: string, app: INestApplication): Promise<number> {
@@ -65,7 +110,7 @@ async function addSkill(name: string, app: INestApplication): Promise<number> {
         newSkillId: number;
     };
 
-    const resp = await request(app.getHttpServer())
+    const resp = await request(httpServerHelper(app))
         .post('/addSkill')
         .send({ name })
         .expect(201);
@@ -74,4 +119,4 @@ async function addSkill(name: string, app: INestApplication): Promise<number> {
     return body.newSkillId;
 }
 
-export { getCrudLoggerRecords, getAstromanSkills, addAstroman, addSkill };
+export { setupTestApp, httpServerHelper, getCrudLoggerRecords, getAstromanSkills, addAstroman, addSkill, deleteAstroman };

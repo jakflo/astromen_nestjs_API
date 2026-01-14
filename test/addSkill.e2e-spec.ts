@@ -1,47 +1,18 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
-import DbService from '../src/db/db.service';
-import { getCrudLoggerRecords, addSkill } from './tools';
-import auxSetup from '../src/mainAuxSetup';
+import { getCrudLoggerRecords, addSkill, setupTestApp, httpServerHelper } from './tools';
 import type { SkillsListItem } from '../src/skills/skills.service';
+import { TestContext } from './types';
 
 describe('AddSkill (e2e)', () => {
-    let app: INestApplication<App>;
-    let db: DbService;
-
-    beforeAll(async () => {
-        const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = moduleFixture.createNestApplication();
-        auxSetup(app);
-        await app.init();
-
-        db = moduleFixture.get(DbService);
-    });
-
-    afterAll(async () => {
-        await app.close();
-        await db.getConn().destroy();
-    });
-
-    beforeEach(async () => {
-        await db.startTransaction();
-    });
-
-    afterEach(async () => {
-        await db.endTransaction(false);
-    });
+    const ctx = {} as TestContext;
+    setupTestApp(ctx);
 
     it('/addSkill (1 polozka)', async () => {
-        const conn = db.getConn();
+        const conn = ctx.db.getConn();
 
         const name = 'skill_1';
-        const newSkillId = await addSkill(name, app);
+        const newSkillId = await addSkill(name, ctx.app);
 
         const newSkillRecords = await conn('skill').where<SkillsListItem[]>(
             'name',
@@ -60,10 +31,10 @@ describe('AddSkill (e2e)', () => {
     });
 
     it('/addSkill (10 polozek)', async () => {
-        const conn = db.getConn();
+        const conn = ctx.db.getConn();
 
         for (let c = 1; c <= 10; c++) {
-            await addSkill(`skill_${c}`, app);
+            await addSkill(`skill_${c}`, ctx.app);
         }
 
         const skillRecords = await conn('skill');
@@ -71,21 +42,21 @@ describe('AddSkill (e2e)', () => {
     });
 
     it('/addSkill (validator)', async () => {
-        await testAddSkill('skill_1', 201, app);
-        await testAddSkill('skill_2', 201, app);
+        await testAddSkill('skill_1', 201, ctx.app);
+        await testAddSkill('skill_2', 201, ctx.app);
 
         //chybejici nebo prazdne jmeno
-        await testAddSkill(null, 400, app);
-        await testAddSkill('  ', 400, app);
+        await testAddSkill(null, 400, ctx.app);
+        await testAddSkill('  ', 400, ctx.app);
 
         //po druhe stejne jmeno, musi selhat
-        await testAddSkill('skill_2', 400, app);
+        await testAddSkill('skill_2', 400, ctx.app);
 
         //prilis dlouhe jmeno
         await testAddSkill(
             'skill_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog_name',
             400,
-            app,
+            ctx.app,
         );
     });
 });
@@ -102,7 +73,7 @@ async function testAddSkill(
         data = { name };
     }
 
-    await request(app.getHttpServer())
+    await request(httpServerHelper(app))
         .post('/addSkill')
         .send(data)
         .expect(expectedCode);

@@ -1,52 +1,27 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
-import DbService from '../src/db/db.service';
 import {
     getCrudLoggerRecords,
     getAstromanSkills,
     addAstroman,
     addSkill,
+    setupTestApp,
+    httpServerHelper
 } from './tools';
 import type { AstromanDbRecord } from '../src/getAstromen/getAstromen.service';
-import auxSetup from '../src/mainAuxSetup';
 import { formateDateToIso } from '../src/utils/dateTools';
+import { AddOrEditAstromanDataSoft } from './types';
+import { TestContext } from './types';
+
 
 describe('AddAstroman (e2e)', () => {
-    let app: INestApplication<App>;
-    let db: DbService;
-
-    beforeAll(async () => {
-        const moduleFixture = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = moduleFixture.createNestApplication();
-        auxSetup(app);
-        await app.init();
-
-        db = moduleFixture.get(DbService);
-    });
-
-    afterAll(async () => {
-        await app.close();
-        await db.getConn().destroy();
-    });
-
-    beforeEach(async () => {
-        await db.startTransaction();
-    });
-
-    afterEach(async () => {
-        await db.endTransaction(false);
-    });
+    const ctx = {} as TestContext;
+    setupTestApp(ctx);
 
     it('/AddAstroman', async () => {
-        const conn = db.getConn();
-        const skillId_1 = await addSkill('skill_1', app);
-        const skillId_2 = await addSkill('skill_2', app);
+        const conn = ctx.db.getConn();
+        const skillId_1 = await addSkill('skill_1', ctx.app);
+        const skillId_2 = await addSkill('skill_2', ctx.app);
         type respBody = {
             status: string;
             newItemId: number;
@@ -59,7 +34,7 @@ describe('AddAstroman (e2e)', () => {
             skills: [skillId_1, skillId_2],
         };
 
-        const resp = await request(app.getHttpServer())
+        const resp = await request(httpServerHelper(ctx.app))
             .post('/newAstroman')
             .send(data_1)
             .expect(201);
@@ -91,7 +66,7 @@ describe('AddAstroman (e2e)', () => {
             'lname_2',
             '1988-08-09',
             [skillId_1],
-            app,
+            ctx.app,
         );
         const newItemSkills_2 = await getAstromanSkills(newItemId_2, conn);
         expect(newItemSkills_2).toHaveLength(1);
@@ -99,199 +74,70 @@ describe('AddAstroman (e2e)', () => {
     });
 
     it('/AddAstroman (validator)', async () => {
-        const skillId_1 = await addSkill('skill_1', app);
-        const skillId_2 = await addSkill('skill_2', app);
+        const skillId_1 = await addSkill('skill_1', ctx.app);
+        const skillId_2 = await addSkill('skill_2', ctx.app);
         const wrongSkillId = skillId_1 + skillId_2;
         const tooLongName =
             'looooooooooooooooooooooooooooooooooooooooooooooooooooooong';
+        const data: AddOrEditAstromanDataSoft = {
+            firstName: 'fname_1', 
+            lastName: 'lname_1', 
+            dob: '1988-08-08', 
+            skills: [skillId_1, skillId_2]
+        };
 
         //chyby v firstName
-        await testAddAstroman(
-            null,
-            'lname_1',
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            ' ',
-            'lname_1',
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            tooLongName,
-            'lname_1',
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
+        const data_fn = {...data, firstName: tooLongName}
+        await testAddAstroman(data_fn, 400, ctx.app);
+        data_fn.firstName = ' ';
+        await testAddAstroman(data_fn, 400, ctx.app);
+        delete data_fn.firstName;
+        await testAddAstroman(data_fn, 400, ctx.app);
 
         //chyby v lastname
-        await testAddAstroman(
-            'fname_1',
-            null,
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            ' ',
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            tooLongName,
-            '1988-08-08',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
+        const data_ln = {...data, lastName: tooLongName}
+        await testAddAstroman(data_ln, 400, ctx.app);
+        data_ln.lastName = ' ';
+        await testAddAstroman(data_ln, 400, ctx.app);
+        delete data_ln.lastName;
+        await testAddAstroman(data_ln, 400, ctx.app);
 
         //chyby v datum narozeni
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            null,
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            'wrong',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-02-30',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1987-02-29',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
+        const data_dob = {...data, dob: 'wrong'}
+        await testAddAstroman(data_dob, 400, ctx.app);
+        data_dob.dob = '1988-02-30';
+        await testAddAstroman(data_dob, 400, ctx.app);
+        data_dob.dob = '1987-02-29';
+        await testAddAstroman(data_dob, 400, ctx.app);
+        data_dob.dob = ' ';
+        await testAddAstroman(data_dob, 400, ctx.app);
+        delete data_dob.dob;
+        await testAddAstroman(data_dob, 400, ctx.app);
 
         //chyby ve skills
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-29',
-            null,
-            400,
-            app,
-        );
-        await testAddAstroman('fname_1', 'lname_1', '1988-08-29', [], 400, app);
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-29',
-            [skillId_1, wrongSkillId],
-            400,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-29',
-            [wrongSkillId],
-            400,
-            app,
-        );
+        const data_sk = {...data, skills: [skillId_1, wrongSkillId]};
+        await testAddAstroman(data_sk, 400, ctx.app);
+        data_sk.skills = [wrongSkillId];
+        await testAddAstroman(data_sk, 400, ctx.app);
+        data_sk.skills = [];
+        await testAddAstroman(data_sk, 400, ctx.app);
+        delete data_sk.skills;
+        await testAddAstroman(data_sk, 400, ctx.app);
 
         //vytvoreni stejne polozky 2x
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-29',
-            [skillId_1, skillId_2],
-            201,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-29',
-            [skillId_1, skillId_2],
-            400,
-            app,
-        );
+        await testAddAstroman(data, 201, ctx.app);
+        await testAddAstroman(data, 400, ctx.app);
+
         //tohle by melo projit
-        await testAddAstroman(
-            'fname_2',
-            'lname_1',
-            '1988-08-29',
-            [skillId_1, skillId_2],
-            201,
-            app,
-        );
-        await testAddAstroman(
-            'fname_1',
-            'lname_1',
-            '1988-08-30',
-            [skillId_1, skillId_2],
-            201,
-            app,
-        );
+        const data_2 = {...data, firstName: 'fname_2'};
+        await testAddAstroman(data_2, 201, ctx.app);
+        const data_3 = {...data, dob: '1988-07-07'};
+        await testAddAstroman(data_3, 201, ctx.app);
     });
 });
 
-async function testAddAstroman(
-    firstName: string | null,
-    lastName: string | null,
-    dob: string | null,
-    skills: number[] | null,
-    expectedCode: number,
-    app: INestApplication,
-) {
-    const data: {
-        firstName?: string;
-        lastName?: string;
-        dob?: string;
-        skills?: number[];
-    } = {};
-
-    if (firstName !== null) {
-        data.firstName = firstName;
-    }
-    if (lastName !== null) {
-        data.lastName = lastName;
-    }
-    if (dob !== null) {
-        data.dob = dob;
-    }
-    if (skills !== null) {
-        data.skills = skills;
-    }
-
-    await request(app.getHttpServer())
+async function testAddAstroman(data: AddOrEditAstromanDataSoft, expectedCode: number, app: INestApplication) {
+    await request(httpServerHelper(app))
         .post('/newAstroman')
         .send(data)
         .expect(expectedCode);
