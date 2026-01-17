@@ -11,8 +11,8 @@ type AddOrEditAstromanDataSoft = {
 };
 
 interface TestContext {
-  app: INestApplication;
-  db: DbService;
+    app: INestApplication;
+    db: DbService;
 }
 
 type AstromanData = InstanceType<typeof AstromanItemDto>;

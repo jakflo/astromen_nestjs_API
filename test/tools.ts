@@ -16,34 +16,34 @@ import { formateDateToIso } from '../src/utils/dateTools';
 
 //spolecne pro vsechny testy - iniciuje se app a db a kazda test se obali rollnutou transakci
 function setupTestApp(ctx: TestContext) {
-  beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    beforeAll(async () => {
+        const moduleFixture = await Test.createTestingModule({
+            imports: [AppModule],
+        }).compile();
 
-    ctx.app = moduleFixture.createNestApplication();
-    auxSetup(ctx.app);
-    await ctx.app.init();
+        ctx.app = moduleFixture.createNestApplication();
+        auxSetup(ctx.app);
+        await ctx.app.init();
 
-    ctx.db = moduleFixture.get(DbService);
-  });
+        ctx.db = moduleFixture.get(DbService);
+    });
 
-  afterAll(async () => {
-    await ctx.app.close();
-    await ctx.db.getConn().destroy();
-  });
+    afterAll(async () => {
+        await ctx.app.close();
+        await ctx.db.getConn().destroy();
+    });
 
-  beforeEach(async () => {
-    await ctx.db.startTransaction();
-  });
+    beforeEach(async () => {
+        await ctx.db.startTransaction();
+    });
 
-  afterEach(async () => {
-    await ctx.db.endTransaction(false);
-  });
+    afterEach(async () => {
+        await ctx.db.endTransaction(false);
+    });
 }
 
 function httpServerHelper(app: INestApplication): Server {
-  return app.getHttpServer() as Server;
+    return app.getHttpServer() as Server;
 }
 
 async function getCrudLoggerRecords(
@@ -122,8 +122,14 @@ async function addSkill(name: string, app: INestApplication): Promise<number> {
 }
 
 // porovna dodana data se zaznamem v DB
-async function compareAstromanItemWithDb(itemId: number, data: AstromanData, conn: Knex | Knex.Transaction) {
-    const itemRecord = (await conn('astroman').where<AstromanDbRecord[]>('id', itemId))[0];
+async function compareAstromanItemWithDb(
+    itemId: number,
+    data: AstromanData,
+    conn: Knex | Knex.Transaction,
+) {
+    const itemRecord = (
+        await conn('astroman').where<AstromanDbRecord[]>('id', itemId)
+    )[0];
     const itemSkills = await getAstromanSkills(itemId, conn);
 
     expect(data.firstName).toEqual(itemRecord.first_name);
@@ -133,4 +139,13 @@ async function compareAstromanItemWithDb(itemId: number, data: AstromanData, con
     expect(data.skills).toEqual(expect.arrayContaining(itemSkills));
 }
 
-export { setupTestApp, httpServerHelper, getCrudLoggerRecords, getAstromanSkills, addAstroman, addSkill, deleteAstroman, compareAstromanItemWithDb };
+export {
+    setupTestApp,
+    httpServerHelper,
+    getCrudLoggerRecords,
+    getAstromanSkills,
+    addAstroman,
+    addSkill,
+    deleteAstroman,
+    compareAstromanItemWithDb,
+};

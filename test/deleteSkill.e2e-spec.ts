@@ -1,6 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { getCrudLoggerRecords, addAstroman, addSkill, deleteAstroman, setupTestApp, httpServerHelper } from './tools';
+import {
+    getCrudLoggerRecords,
+    addAstroman,
+    addSkill,
+    deleteAstroman,
+    setupTestApp,
+    httpServerHelper,
+} from './tools';
 import type { SkillsListItem } from '../src/skills/skills.service';
 import { TestContext } from './types';
 
@@ -51,7 +58,13 @@ describe('DeleteSkill (e2e)', () => {
         await testDeleteSkill(wrongSkillId, 404, ctx.app);
 
         // pokus o smazani jiz pouzite dovednosti
-        const newItemId =  await addAstroman('f1', 'l1', '1988-08-08', [skillId_1], ctx.app);
+        const newItemId = await addAstroman(
+            'f1',
+            'l1',
+            '1988-08-08',
+            [skillId_1],
+            ctx.app,
+        );
         await testDeleteSkill(skillId_1, 400, ctx.app);
         await deleteAstroman(newItemId, ctx.app);
         await testDeleteSkill(skillId_1, 200, ctx.app);

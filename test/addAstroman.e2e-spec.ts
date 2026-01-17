@@ -6,11 +6,10 @@ import {
     addSkill,
     setupTestApp,
     httpServerHelper,
-    compareAstromanItemWithDb
+    compareAstromanItemWithDb,
 } from './tools';
 import { AddOrEditAstromanDataSoft } from './types';
 import { TestContext, AstromanData } from './types';
-
 
 describe('AddAstroman (e2e)', () => {
     const ctx = {} as TestContext;
@@ -73,14 +72,14 @@ describe('AddAstroman (e2e)', () => {
         const tooLongName =
             'looooooooooooooooooooooooooooooooooooooooooooooooooooooong';
         const data: AddOrEditAstromanDataSoft = {
-            firstName: 'fname_1', 
-            lastName: 'lname_1', 
-            dob: '1988-08-08', 
-            skills: [skillId_1, skillId_2]
+            firstName: 'fname_1',
+            lastName: 'lname_1',
+            dob: '1988-08-08',
+            skills: [skillId_1, skillId_2],
         };
 
         //chyby v firstName
-        const data_fn = {...data, firstName: tooLongName}
+        const data_fn = { ...data, firstName: tooLongName };
         await testAddAstroman(data_fn, 400, ctx.app);
         data_fn.firstName = ' ';
         await testAddAstroman(data_fn, 400, ctx.app);
@@ -88,7 +87,7 @@ describe('AddAstroman (e2e)', () => {
         await testAddAstroman(data_fn, 400, ctx.app);
 
         //chyby v lastname
-        const data_ln = {...data, lastName: tooLongName}
+        const data_ln = { ...data, lastName: tooLongName };
         await testAddAstroman(data_ln, 400, ctx.app);
         data_ln.lastName = ' ';
         await testAddAstroman(data_ln, 400, ctx.app);
@@ -96,7 +95,7 @@ describe('AddAstroman (e2e)', () => {
         await testAddAstroman(data_ln, 400, ctx.app);
 
         //chyby v datum narozeni
-        const data_dob = {...data, dob: 'wrong'}
+        const data_dob = { ...data, dob: 'wrong' };
         await testAddAstroman(data_dob, 400, ctx.app);
         data_dob.dob = '1988-02-30';
         await testAddAstroman(data_dob, 400, ctx.app);
@@ -108,7 +107,7 @@ describe('AddAstroman (e2e)', () => {
         await testAddAstroman(data_dob, 400, ctx.app);
 
         //chyby ve skills
-        const data_sk = {...data, skills: [skillId_1, wrongSkillId]};
+        const data_sk = { ...data, skills: [skillId_1, wrongSkillId] };
         await testAddAstroman(data_sk, 400, ctx.app);
         data_sk.skills = [wrongSkillId];
         await testAddAstroman(data_sk, 400, ctx.app);
@@ -122,14 +121,18 @@ describe('AddAstroman (e2e)', () => {
         await testAddAstroman(data, 400, ctx.app);
 
         //tohle by melo projit
-        const data_2 = {...data, firstName: 'fname_2'};
+        const data_2 = { ...data, firstName: 'fname_2' };
         await testAddAstroman(data_2, 201, ctx.app);
-        const data_3 = {...data, dob: '1988-07-07'};
+        const data_3 = { ...data, dob: '1988-07-07' };
         await testAddAstroman(data_3, 201, ctx.app);
     });
 });
 
-async function testAddAstroman(data: AddOrEditAstromanDataSoft, expectedCode: number, app: INestApplication) {
+async function testAddAstroman(
+    data: AddOrEditAstromanDataSoft,
+    expectedCode: number,
+    app: INestApplication,
+) {
     await request(httpServerHelper(app))
         .post('/newAstroman')
         .send(data)

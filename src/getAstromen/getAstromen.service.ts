@@ -34,7 +34,7 @@ type GetAstromenOutput = {
     itemsCount: number;
     pagesCount: number;
     page: number;
-    itemsInPage: AstromanRecord[]
+    itemsInPage: AstromanRecord[];
 };
 
 @Injectable()
@@ -44,7 +44,10 @@ export default class GetAstromenService {
         private readonly paginatorHelper: PaginatorHelper,
     ) {}
 
-    async getAstromen(page: number, itemsPerPage: number): Promise<GetAstromenOutput> {
+    async getAstromen(
+        page: number,
+        itemsPerPage: number,
+    ): Promise<GetAstromenOutput> {
         const conn = this.db.getConn();
 
         const { limit, offset } = this.paginatorHelper.getLimitAndOffset(
@@ -62,7 +65,12 @@ export default class GetAstromenService {
         );
 
         if (itemsCount === 0) {
-            return { itemsCount, pagesCount, page, itemsInPage: [] as AstromanRecord[] };
+            return {
+                itemsCount,
+                pagesCount,
+                page,
+                itemsInPage: [] as AstromanRecord[],
+            };
         }
 
         const idsInPage = (

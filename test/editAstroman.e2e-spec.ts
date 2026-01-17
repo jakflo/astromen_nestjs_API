@@ -5,8 +5,8 @@ import {
     addAstroman,
     addSkill,
     setupTestApp,
-    httpServerHelper, 
-    compareAstromanItemWithDb
+    httpServerHelper,
+    compareAstromanItemWithDb,
 } from './tools';
 import { AddOrEditAstromanDataSoft } from './types';
 import { TestContext, AstromanData } from './types';
@@ -21,61 +21,113 @@ describe('EditAstroman (e2e)', () => {
         const skillId_2 = await addSkill('skill_2', ctx.app);
 
         const data_1: AstromanData = {
-            firstName: 'fname_1', 
-            lastName: 'lname_1', 
-            dob: '1988-08-08', 
-            skills: [skillId_1, skillId_2]
+            firstName: 'fname_1',
+            lastName: 'lname_1',
+            dob: '1988-08-08',
+            skills: [skillId_1, skillId_2],
         };
         const data_2: AstromanData = {
-            firstName: 'fname_2', 
-            lastName: 'lname_2', 
-            dob: '1988-08-09', 
-            skills: [skillId_1]
+            firstName: 'fname_2',
+            lastName: 'lname_2',
+            dob: '1988-08-09',
+            skills: [skillId_1],
         };
-        const newItemId_1 = await addAstroman(data_1.firstName, data_1.lastName, data_1.dob, data_1.skills, ctx.app);
-        const newItemId_2 = await addAstroman(data_2.firstName, data_2.lastName, data_2.dob, data_2.skills, ctx.app);
+        const newItemId_1 = await addAstroman(
+            data_1.firstName,
+            data_1.lastName,
+            data_1.dob,
+            data_1.skills,
+            ctx.app,
+        );
+        const newItemId_2 = await addAstroman(
+            data_2.firstName,
+            data_2.lastName,
+            data_2.dob,
+            data_2.skills,
+            ctx.app,
+        );
 
         //zmenime zakladni data i skills
         const data_1b = {
             firstName: 'fname_1b',
             lastName: 'lname_1b',
             dob: '1988-07-07',
-            skills: [skillId_2]
+            skills: [skillId_2],
         };
-        
-        await testGoodEditAstroman(newItemId_1, data_1b, 'changes in astroman were successfully saved', ctx.app);
+
+        await testGoodEditAstroman(
+            newItemId_1,
+            data_1b,
+            'changes in astroman were successfully saved',
+            ctx.app,
+        );
         await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
         await compareAstromanItemWithDb(newItemId_2, data_2, conn);
-        let crudLoggerRecords = await getCrudLoggerRecords(newItemId_1, 'u', 'astroman', conn);
+        let crudLoggerRecords = await getCrudLoggerRecords(
+            newItemId_1,
+            'u',
+            'astroman',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(1);
 
         //nezmenime nic
-        await testGoodEditAstroman(newItemId_2, data_2, 'no change in astroman detected, nothig was saved', ctx.app);
+        await testGoodEditAstroman(
+            newItemId_2,
+            data_2,
+            'no change in astroman detected, nothig was saved',
+            ctx.app,
+        );
         await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
         await compareAstromanItemWithDb(newItemId_2, data_2, conn);
-        crudLoggerRecords = await getCrudLoggerRecords(newItemId_2, 'u', 'astroman', conn);
+        crudLoggerRecords = await getCrudLoggerRecords(
+            newItemId_2,
+            'u',
+            'astroman',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(0);
 
         //zmenime pouze skills
         const data_2b = {
-            ...data_2, 
-            skills: [skillId_1, skillId_2]
+            ...data_2,
+            skills: [skillId_1, skillId_2],
         };
-        await testGoodEditAstroman(newItemId_2, data_2b, 'changes in astroman were successfully saved', ctx.app);
+        await testGoodEditAstroman(
+            newItemId_2,
+            data_2b,
+            'changes in astroman were successfully saved',
+            ctx.app,
+        );
         await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
         await compareAstromanItemWithDb(newItemId_2, data_2b, conn);
-        crudLoggerRecords = await getCrudLoggerRecords(newItemId_2, 'u', 'astroman', conn);
+        crudLoggerRecords = await getCrudLoggerRecords(
+            newItemId_2,
+            'u',
+            'astroman',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(1);
 
         //zmenime pouze zakladni data
         const data_1c = {
-            ...data_1, 
-            skills: [skillId_2]
+            ...data_1,
+            skills: [skillId_2],
         };
-        await testGoodEditAstroman(newItemId_1, data_1c, 'changes in astroman were successfully saved', ctx.app);
+        await testGoodEditAstroman(
+            newItemId_1,
+            data_1c,
+            'changes in astroman were successfully saved',
+            ctx.app,
+        );
         await compareAstromanItemWithDb(newItemId_1, data_1c, conn);
         await compareAstromanItemWithDb(newItemId_2, data_2b, conn);
-        crudLoggerRecords = await getCrudLoggerRecords(newItemId_1, 'u', 'astroman', conn);
+        crudLoggerRecords = await getCrudLoggerRecords(
+            newItemId_1,
+            'u',
+            'astroman',
+            conn,
+        );
         expect(crudLoggerRecords).toHaveLength(2);
     });
 
@@ -85,21 +137,34 @@ describe('EditAstroman (e2e)', () => {
         const wrongSkillId = skillId_1 + skillId_2;
 
         const data: AddOrEditAstromanDataSoft = {
-            firstName: 'fname_1', 
-            lastName: 'lname_1', 
-            dob: '1988-08-08', 
-            skills: [skillId_1, skillId_2]
+            firstName: 'fname_1',
+            lastName: 'lname_1',
+            dob: '1988-08-08',
+            skills: [skillId_1, skillId_2],
         };
-        const newItemId_1 = await addAstroman(data.firstName, data.lastName, data.dob, data.skills, ctx.app);
-        const newItemId_2 = await addAstroman('fname_2', 'lname_2', '1988-07-07', [skillId_2], ctx.app);
+        const newItemId_1 = await addAstroman(
+            data.firstName,
+            data.lastName,
+            data.dob,
+            data.skills,
+            ctx.app,
+        );
+        const newItemId_2 = await addAstroman(
+            'fname_2',
+            'lname_2',
+            '1988-07-07',
+            [skillId_2],
+            ctx.app,
+        );
         const wrongItemId = newItemId_1 + newItemId_2;
-        const tooLongName = 'too loooooooooooooooooooooooooooooooooooooooooooooooooooooong';
+        const tooLongName =
+            'too loooooooooooooooooooooooooooooooooooooooooooooooooooooong';
 
         //spatne id
         await testEditAstroman(wrongItemId, data, 404, ctx.app);
 
         //spatne fname
-        const data_fn = {...data, firstName: tooLongName}
+        const data_fn = { ...data, firstName: tooLongName };
         await testEditAstroman(newItemId_1, data_fn, 400, ctx.app);
         data_fn.firstName = ' ';
         await testEditAstroman(newItemId_1, data_fn, 400, ctx.app);
@@ -107,7 +172,7 @@ describe('EditAstroman (e2e)', () => {
         await testEditAstroman(newItemId_1, data_fn, 400, ctx.app);
 
         //spatne lname
-        const data_ln = {...data, lastName: tooLongName}
+        const data_ln = { ...data, lastName: tooLongName };
         await testEditAstroman(newItemId_1, data_ln, 400, ctx.app);
         data_ln.lastName = ' ';
         await testEditAstroman(newItemId_1, data_ln, 400, ctx.app);
@@ -115,7 +180,7 @@ describe('EditAstroman (e2e)', () => {
         await testEditAstroman(newItemId_1, data_ln, 400, ctx.app);
 
         //spatny datum narozeni
-        const data_dob = {...data, dob: 'wrong'}
+        const data_dob = { ...data, dob: 'wrong' };
         await testEditAstroman(newItemId_1, data_dob, 400, ctx.app);
         data_dob.dob = '1988-02-30';
         await testEditAstroman(newItemId_1, data_dob, 400, ctx.app);
@@ -127,7 +192,7 @@ describe('EditAstroman (e2e)', () => {
         await testEditAstroman(newItemId_1, data_dob, 400, ctx.app);
 
         //spatne skills
-        const data_sk = {...data, skills: [skillId_1, wrongSkillId]};
+        const data_sk = { ...data, skills: [skillId_1, wrongSkillId] };
         await testEditAstroman(newItemId_1, data_sk, 400, ctx.app);
         data_sk.skills = [];
         await testEditAstroman(newItemId_1, data_sk, 400, ctx.app);
@@ -142,7 +207,12 @@ describe('EditAstroman (e2e)', () => {
 });
 
 //zde pocitam s korektnim requestem
-async function testGoodEditAstroman(id: number, data: AstromanData, expectedStatus: string, app: INestApplication) {
+async function testGoodEditAstroman(
+    id: number,
+    data: AstromanData,
+    expectedStatus: string,
+    app: INestApplication,
+) {
     type respBody = {
         status: string;
         itemId: number;
@@ -158,7 +228,12 @@ async function testGoodEditAstroman(id: number, data: AstromanData, expectedStat
 }
 
 //a zde mohou byt nekorektni requesty
-async function testEditAstroman(id: number, data: AddOrEditAstromanDataSoft, expectedCode: number, app: INestApplication) {
+async function testEditAstroman(
+    id: number,
+    data: AddOrEditAstromanDataSoft,
+    expectedCode: number,
+    app: INestApplication,
+) {
     await request(httpServerHelper(app))
         .put(`/editAstroman/${id}`)
         .send(data)

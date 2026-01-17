@@ -26,8 +26,14 @@ describe('GetSkills (e2e)', () => {
         expect(skillsInResponse).toHaveLength(5);
 
         for (const skillname of skillnames) {
-            const skillIdInResponse = skillsInResponse.filter((item: SkillsListItem) => item.name === skillname)[0].id;
-            const skillIdInDb = (await conn('skill').where<SkillsListItem[]>('name', skillname).first()).id;
+            const skillIdInResponse = skillsInResponse.filter(
+                (item: SkillsListItem) => item.name === skillname,
+            )[0].id;
+            const skillIdInDb = (
+                await conn('skill')
+                    .where<SkillsListItem[]>('name', skillname)
+                    .first()
+            ).id;
             expect(skillIdInResponse).toEqual(skillIdInDb);
         }
     });

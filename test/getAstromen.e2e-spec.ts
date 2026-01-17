@@ -1,10 +1,19 @@
 import request from 'supertest';
-import { addSkill, setupTestApp, httpServerHelper, addAstroman, compareAstromanItemWithDb } from './tools';
+import {
+    addSkill,
+    setupTestApp,
+    httpServerHelper,
+    addAstroman,
+    compareAstromanItemWithDb,
+} from './tools';
 import { TestContext, AstromanData } from './types';
 import { itemsPerPage } from '../src/config';
 import { INestApplication } from '@nestjs/common';
 import { formateDateToIso } from '../src/utils/dateTools';
-import type { GetAstromenOutput, AstromanRecord } from '../src/getAstromen/getAstromen.service';
+import type {
+    GetAstromenOutput,
+    AstromanRecord,
+} from '../src/getAstromen/getAstromen.service';
 import { Knex } from 'knex';
 
 describe('/getAstromen (e2e)', () => {
@@ -12,7 +21,7 @@ describe('/getAstromen (e2e)', () => {
     setupTestApp(ctx);
 
     const itIf = (condition: boolean, ...args: Parameters<typeof test>) =>
-    condition ? it(...args) : it.skip(...args);
+        condition ? it(...args) : it.skip(...args);
 
     //1 neuplnna stranka (o 2 polozky mene, nez maximum polozek na stranku), je-li itemsPerPage < 3, test bude preskocen
     itIf(itemsPerPage > 2, '/getAstromen (1 neuplnna stranka)', async () => {
@@ -74,11 +83,21 @@ async function prepareData(itemsCount: number, app: INestApplication) {
             skills = [skillId_1, skillId_2];
         }
 
-        await addAstroman(`fname_${c}`, `lname_${c}`, formateDateToIso(newDob), skills, app);
+        await addAstroman(
+            `fname_${c}`,
+            `lname_${c}`,
+            formateDateToIso(newDob),
+            skills,
+            app,
+        );
     }
 }
 
-async function makeRequest(page: number | null, itemsPerPage: number | null, app: INestApplication): Promise<GetAstromenOutput> {
+async function makeRequest(
+    page: number | null,
+    itemsPerPage: number | null,
+    app: INestApplication,
+): Promise<GetAstromenOutput> {
     type Query = {
         page?: number;
         itemsPerPage?: number;
@@ -101,16 +120,20 @@ async function makeRequest(page: number | null, itemsPerPage: number | null, app
 }
 
 // zkontroluje, zda sedi ids v DB zaznamech pro dany paginator a data z response
-async function checkRecordsId(page: number, itemsPerPage: number, respData: AstromanRecord[], conn: Knex | Knex.Transaction) {
+async function checkRecordsId(
+    page: number,
+    itemsPerPage: number,
+    respData: AstromanRecord[],
+    conn: Knex | Knex.Transaction,
+) {
     const offset = (page - 1) * itemsPerPage;
-    type RawDbRecord = {id: number};
+    type RawDbRecord = { id: number };
 
     const rawDbRecords = await conn<RawDbRecord[]>('astroman')
         .select('id')
         .orderBy('id', 'asc')
         .offset(offset)
-        .limit(itemsPerPage)
-    ;
+        .limit(itemsPerPage);
     const idsInDbRecords = rawDbRecords.map((item: RawDbRecord) => item.id);
 
     const idsInRespData = respData.map((item: AstromanRecord) => item.id);
@@ -120,17 +143,22 @@ async function checkRecordsId(page: number, itemsPerPage: number, respData: Astr
 }
 
 // data z response srovna s daty v DB; pokud nejaka data v response chyby, tak nebudou zkontrolovana, proto dobre nejdriv provest checkRecordsId()
-async function checkRecordsData(respData: AstromanRecord[], conn: Knex | Knex.Transaction) {
-    type SkillInResponse = {id: number; name: string};
+async function checkRecordsData(
+    respData: AstromanRecord[],
+    conn: Knex | Knex.Transaction,
+) {
+    type SkillInResponse = { id: number; name: string };
 
     for (const item of respData) {
         const id = item.id;
-        const skills = item.skills.map((skillItem: SkillInResponse) => skillItem.id);
+        const skills = item.skills.map(
+            (skillItem: SkillInResponse) => skillItem.id,
+        );
         const data: AstromanData = {
-            firstName: item.firstName, 
-            lastName: item.lastName, 
-            dob: item.dob, 
-            skills
+            firstName: item.firstName,
+            lastName: item.lastName,
+            dob: item.dob,
+            skills,
         };
 
         await compareAstromanItemWithDb(id, data, conn);
