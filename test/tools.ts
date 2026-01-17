@@ -9,8 +9,10 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import auxSetup from '../src/mainAuxSetup';
 import DbService from '../src/db/db.service';
-import { TestContext } from './types';
+import { TestContext, AstromanData } from './types';
 import { Server } from 'http';
+import type { AstromanDbRecord } from '../src/getAstromen/getAstromen.service';
+import { formateDateToIso } from '../src/utils/dateTools';
 
 //spolecne pro vsechny testy - iniciuje se app a db a kazda test se obali rollnutou transakci
 function setupTestApp(ctx: TestContext) {
@@ -119,4 +121,16 @@ async function addSkill(name: string, app: INestApplication): Promise<number> {
     return body.newSkillId;
 }
 
-export { setupTestApp, httpServerHelper, getCrudLoggerRecords, getAstromanSkills, addAstroman, addSkill, deleteAstroman };
+// porovna dodana data se zaznamem v DB
+async function compareAstromanItemWithDb(itemId: number, data: AstromanData, conn: Knex | Knex.Transaction) {
+    const itemRecord = (await conn('astroman').where<AstromanDbRecord[]>('id', itemId))[0];
+    const itemSkills = await getAstromanSkills(itemId, conn);
+
+    expect(data.firstName).toEqual(itemRecord.first_name);
+    expect(data.lastName).toEqual(itemRecord.last_name);
+    expect(data.dob).toEqual(formateDateToIso(itemRecord.DOB));
+    expect(itemSkills).toEqual(expect.arrayContaining(data.skills));
+    expect(data.skills).toEqual(expect.arrayContaining(itemSkills));
+}
+
+export { setupTestApp, httpServerHelper, getCrudLoggerRecords, getAstromanSkills, addAstroman, addSkill, deleteAstroman, compareAstromanItemWithDb };

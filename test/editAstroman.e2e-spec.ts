@@ -2,20 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import {
     getCrudLoggerRecords,
-    getAstromanSkills,
     addAstroman,
     addSkill,
     setupTestApp,
-    httpServerHelper
+    httpServerHelper, 
+    compareAstromanItemWithDb
 } from './tools';
-import type { AstromanDbRecord } from '../src/getAstromen/getAstromen.service';
-import { formateDateToIso } from '../src/utils/dateTools';
-import AstromanItemDto from '../src/addOrEditAstromanCommon/dto/AstromanItemDto';
-import { Knex } from 'knex';
 import { AddOrEditAstromanDataSoft } from './types';
-import { TestContext } from './types';
-
-type EditAstromanData = InstanceType<typeof AstromanItemDto>;
+import { TestContext, AstromanData } from './types';
 
 describe('EditAstroman (e2e)', () => {
     const ctx = {} as TestContext;
@@ -26,13 +20,13 @@ describe('EditAstroman (e2e)', () => {
         const skillId_1 = await addSkill('skill_1', ctx.app);
         const skillId_2 = await addSkill('skill_2', ctx.app);
 
-        const data_1: EditAstromanData = {
+        const data_1: AstromanData = {
             firstName: 'fname_1', 
             lastName: 'lname_1', 
             dob: '1988-08-08', 
             skills: [skillId_1, skillId_2]
         };
-        const data_2: EditAstromanData = {
+        const data_2: AstromanData = {
             firstName: 'fname_2', 
             lastName: 'lname_2', 
             dob: '1988-08-09', 
@@ -50,15 +44,15 @@ describe('EditAstroman (e2e)', () => {
         };
         
         await testGoodEditAstroman(newItemId_1, data_1b, 'changes in astroman were successfully saved', ctx.app);
-        await compareItemWithDb(newItemId_1, data_1b, conn);
-        await compareItemWithDb(newItemId_2, data_2, conn);
+        await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
+        await compareAstromanItemWithDb(newItemId_2, data_2, conn);
         let crudLoggerRecords = await getCrudLoggerRecords(newItemId_1, 'u', 'astroman', conn);
         expect(crudLoggerRecords).toHaveLength(1);
 
         //nezmenime nic
         await testGoodEditAstroman(newItemId_2, data_2, 'no change in astroman detected, nothig was saved', ctx.app);
-        await compareItemWithDb(newItemId_1, data_1b, conn);
-        await compareItemWithDb(newItemId_2, data_2, conn);
+        await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
+        await compareAstromanItemWithDb(newItemId_2, data_2, conn);
         crudLoggerRecords = await getCrudLoggerRecords(newItemId_2, 'u', 'astroman', conn);
         expect(crudLoggerRecords).toHaveLength(0);
 
@@ -68,8 +62,8 @@ describe('EditAstroman (e2e)', () => {
             skills: [skillId_1, skillId_2]
         };
         await testGoodEditAstroman(newItemId_2, data_2b, 'changes in astroman were successfully saved', ctx.app);
-        await compareItemWithDb(newItemId_1, data_1b, conn);
-        await compareItemWithDb(newItemId_2, data_2b, conn);
+        await compareAstromanItemWithDb(newItemId_1, data_1b, conn);
+        await compareAstromanItemWithDb(newItemId_2, data_2b, conn);
         crudLoggerRecords = await getCrudLoggerRecords(newItemId_2, 'u', 'astroman', conn);
         expect(crudLoggerRecords).toHaveLength(1);
 
@@ -79,8 +73,8 @@ describe('EditAstroman (e2e)', () => {
             skills: [skillId_2]
         };
         await testGoodEditAstroman(newItemId_1, data_1c, 'changes in astroman were successfully saved', ctx.app);
-        await compareItemWithDb(newItemId_1, data_1c, conn);
-        await compareItemWithDb(newItemId_2, data_2b, conn);
+        await compareAstromanItemWithDb(newItemId_1, data_1c, conn);
+        await compareAstromanItemWithDb(newItemId_2, data_2b, conn);
         crudLoggerRecords = await getCrudLoggerRecords(newItemId_1, 'u', 'astroman', conn);
         expect(crudLoggerRecords).toHaveLength(2);
     });
@@ -147,22 +141,8 @@ describe('EditAstroman (e2e)', () => {
     });
 });
 
-
-
-// porovna dodana data se zaznamem v DB
-async function compareItemWithDb(itemId: number, data: EditAstromanData, conn: Knex | Knex.Transaction) {
-    const itemRecord = (await conn('astroman').where<AstromanDbRecord[]>('id', itemId))[0];
-    const itemSkills = await getAstromanSkills(itemId, conn);
-
-    expect(data.firstName).toEqual(itemRecord.first_name);
-    expect(data.lastName).toEqual(itemRecord.last_name);
-    expect(data.dob).toEqual(formateDateToIso(itemRecord.DOB));
-    expect(itemSkills).toEqual(expect.arrayContaining(data.skills));
-    expect(data.skills).toEqual(expect.arrayContaining(itemSkills));
-}
-
 //zde pocitam s korektnim requestem
-async function testGoodEditAstroman(id: number, data: EditAstromanData, expectedStatus: string, app: INestApplication) {
+async function testGoodEditAstroman(id: number, data: AstromanData, expectedStatus: string, app: INestApplication) {
     type respBody = {
         status: string;
         itemId: number;

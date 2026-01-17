@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import DbService from '../src/db/db.service';
+import AstromanItemDto from '../src/addOrEditAstromanCommon/dto/AstromanItemDto';
 
 //vsechny jinak povinne polozky jsou nepovinne, takze je mozne udelat neplatny request
 type AddOrEditAstromanDataSoft = {
@@ -14,4 +15,6 @@ interface TestContext {
   db: DbService;
 }
 
-export type { AddOrEditAstromanDataSoft, TestContext };
+type AstromanData = InstanceType<typeof AstromanItemDto>;
+
+export type { AddOrEditAstromanDataSoft, TestContext, AstromanData };

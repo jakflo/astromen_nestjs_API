@@ -2,16 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import {
     getCrudLoggerRecords,
-    getAstromanSkills,
     addAstroman,
     addSkill,
     setupTestApp,
-    httpServerHelper
+    httpServerHelper,
+    compareAstromanItemWithDb
 } from './tools';
-import type { AstromanDbRecord } from '../src/getAstromen/getAstromen.service';
-import { formateDateToIso } from '../src/utils/dateTools';
 import { AddOrEditAstromanDataSoft } from './types';
-import { TestContext } from './types';
+import { TestContext, AstromanData } from './types';
 
 
 describe('AddAstroman (e2e)', () => {
@@ -27,7 +25,7 @@ describe('AddAstroman (e2e)', () => {
             newItemId: number;
         };
 
-        const data_1 = {
+        const data_1: AstromanData = {
             firstName: 'fname_1',
             lastName: 'lname_1',
             dob: '1988-08-08',
@@ -41,6 +39,7 @@ describe('AddAstroman (e2e)', () => {
         const body = resp.body as respBody;
         expect(body.status).toEqual('new astroman inserted');
         const newItemId_1 = body.newItemId;
+        await compareAstromanItemWithDb(newItemId_1, data_1, conn);
 
         const crudLoggerRecords = await getCrudLoggerRecords(
             newItemId_1,
@@ -50,27 +49,21 @@ describe('AddAstroman (e2e)', () => {
         );
         expect(crudLoggerRecords).toHaveLength(1);
 
-        const newItemRecord_1 = await conn('astroman').where<
-            AstromanDbRecord[]
-        >('id', newItemId_1);
-        const newItemSkills_1 = await getAstromanSkills(newItemId_1, conn);
-        expect(newItemRecord_1[0].first_name).toEqual('fname_1');
-        expect(newItemRecord_1[0].last_name).toEqual('lname_1');
-        expect(formateDateToIso(newItemRecord_1[0].DOB)).toEqual('1988-08-08');
-        expect(newItemSkills_1).toHaveLength(2);
-        expect(newItemSkills_1).toContain(skillId_1);
-        expect(newItemSkills_1).toContain(skillId_2);
+        const data_2: AstromanData = {
+            firstName: 'fname_2',
+            lastName: 'lname_2',
+            dob: '1988-08-09',
+            skills: [skillId_1],
+        };
 
         const newItemId_2 = await addAstroman(
-            'fname_2',
-            'lname_2',
-            '1988-08-09',
-            [skillId_1],
+            data_2.firstName,
+            data_2.lastName,
+            data_2.dob,
+            data_2.skills,
             ctx.app,
         );
-        const newItemSkills_2 = await getAstromanSkills(newItemId_2, conn);
-        expect(newItemSkills_2).toHaveLength(1);
-        expect(newItemSkills_2).toContain(skillId_1);
+        await compareAstromanItemWithDb(newItemId_2, data_2, conn);
     });
 
     it('/AddAstroman (validator)', async () => {
