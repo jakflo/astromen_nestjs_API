@@ -31,7 +31,7 @@ describe('AddSkill (e2e)', () => {
             .send({ name: 'skill_2b' })
             .expect(200)
             .expect({
-                status: 'no change in skill detected, nothig was saved',
+                status: 'no change in skill detected, nothing was saved',
                 id: skillId_2,
             });
 

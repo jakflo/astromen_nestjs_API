@@ -75,7 +75,7 @@ describe('EditAstroman (e2e)', () => {
         await testGoodEditAstroman(
             newItemId_2,
             data_2,
-            'no change in astroman detected, nothig was saved',
+            'no change in astroman detected, nothing was saved',
             ctx.app,
         );
         await compareAstromanItemWithDb(newItemId_1, data_1b, conn);

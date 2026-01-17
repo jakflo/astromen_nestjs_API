@@ -52,7 +52,7 @@ export default class EditAstromanController {
         );
         if (response === 'unchanged') {
             return {
-                status: 'no change in astroman detected, nothig was saved',
+                status: 'no change in astroman detected, nothing was saved',
                 itemId: id,
             };
         } else if (response === 'saved') {

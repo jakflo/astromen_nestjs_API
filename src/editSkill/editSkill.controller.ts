@@ -41,7 +41,7 @@ export default class EditSkillController {
         const response = await this.editSkillService.editSkill(id, name);
         if (response === 'unchanged') {
             return {
-                status: 'no change in skill detected, nothig was saved',
+                status: 'no change in skill detected, nothing was saved',
                 id,
             };
         } else if (response === 'saved') {
