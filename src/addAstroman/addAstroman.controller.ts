@@ -4,7 +4,18 @@ import AddAstromanService from './addAstroman.service';
 import AstromanItemDto from '../addOrEditAstromanCommon/dto/AstromanItemDto';
 import AddOrEditAstromanCommonService from '../addOrEditAstromanCommon/addOrEditAstromanCommon.service';
 import { getAstromanExistsErrorMessage } from '../utils/getValidationErrorMessage';
+import { ApiTags, ApiResponse, ApiBody, ApiProperty } from '@nestjs/swagger';
+import { ValidationErrorResponse } from '../utils/commonTypes';
 
+class AddAstromanSuccessResponse {
+    @ApiProperty({ enum: ['new astroman inserted'] })
+    status: 'new astroman inserted';
+
+    @ApiProperty({ example: 1, description: 'New astroman ID' })
+    newItemId: number;
+}
+
+@ApiTags('astromen')
 @Controller()
 export default class AddAstromanController {
     constructor(
@@ -13,6 +24,13 @@ export default class AddAstromanController {
     ) {}
 
     @Post('/newAstroman')
+    @ApiBody({ type: AstromanItemDto })
+    @ApiResponse({
+        status: 201,
+        description: 'New astroman inserted',
+        type: AddAstromanSuccessResponse,
+    })
+    @ValidationErrorResponse('firstName must be a string')
     async addAstroman(
         @Body() data: AstromanItemDto,
         @Res({ passthrough: true }) res: Response,

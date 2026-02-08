@@ -6,7 +6,7 @@ import {
     setupTestApp,
     httpServerHelper,
 } from './tools';
-import type { SkillsListItem } from '../src/skills/skills.service';
+import SkillResponseDto from '../src/skills/dto/SkillResponseDto';
 import { TestContext } from './types';
 
 describe('AddSkill (e2e)', () => {
@@ -19,7 +19,7 @@ describe('AddSkill (e2e)', () => {
         const name = 'skill_1';
         const newSkillId = await addSkill(name, ctx.app);
 
-        const newSkillRecords = await conn('skill').where<SkillsListItem[]>(
+        const newSkillRecords = await conn('skill').where<SkillResponseDto[]>(
             'name',
             name,
         );

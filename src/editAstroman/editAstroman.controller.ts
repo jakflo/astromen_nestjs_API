@@ -9,6 +9,26 @@ import {
     getItemIdNotFoundErrorMessage,
 } from '../utils/getValidationErrorMessage';
 import DbService from '../db/db.service';
+import { ApiTags, ApiResponse, ApiProperty, ApiParam } from '@nestjs/swagger';
+import {
+    ValidationErrorResponse,
+    NotFoundErrorResponse,
+} from '../utils/commonTypes';
+
+class EditAstromanSuccessResponse {
+    @ApiProperty({
+        enum: [
+            'changes in astroman were successfully saved',
+            'no change in astroman detected, nothing was saved',
+        ],
+    })
+    status:
+        | 'changes in astroman were successfully saved'
+        | 'no change in astroman detected, nothing was saved';
+
+    @ApiProperty({ example: 1, description: 'Edited astroman ID' })
+    itemId: number;
+}
 
 @Controller()
 export default class EditAstromanController {
@@ -18,6 +38,19 @@ export default class EditAstromanController {
         private readonly db: DbService,
     ) {}
 
+    @ApiTags('astromen')
+    @ApiParam({
+        type: IdDto,
+        name: 'id',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Astroman successfully edited',
+        type: EditAstromanSuccessResponse,
+    })
+    @ValidationErrorResponse('firstName must be a string')
+    @ValidationErrorResponse('id must be an integer number')
+    @NotFoundErrorResponse('Astroman id {id} not found')
     @Put('/editAstroman/:id')
     async editAstroman(
         @Param() pathParams: IdDto,

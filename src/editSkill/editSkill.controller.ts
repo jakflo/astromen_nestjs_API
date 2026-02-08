@@ -9,6 +9,24 @@ import {
     getSkillNameIsUsedErrorMessage,
     getSkillIdNotFoundErrorMessage,
 } from '../utils/getValidationErrorMessage';
+import { ApiTags, ApiResponse, ApiProperty, ApiParam } from '@nestjs/swagger';
+import {
+    ValidationErrorResponse,
+    NotFoundErrorResponse,
+} from '../utils/commonTypes';
+
+class EditSkillSuccessResponse {
+    @ApiProperty({
+        enum: [
+            'skill edited',
+            'no change in skill detected, nothing was saved',
+        ],
+    })
+    status: 'skill edited' | 'no change in skill detected, nothing was saved';
+
+    @ApiProperty({ example: 1, description: 'Edited skill ID' })
+    id: number;
+}
 
 @Controller()
 export default class EditSkillController {
@@ -18,6 +36,19 @@ export default class EditSkillController {
         private readonly db: DbService,
     ) {}
 
+    @ApiTags('skills')
+    @ApiParam({
+        type: IdDto,
+        name: 'id',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Skill successfully edited',
+        type: EditSkillSuccessResponse,
+    })
+    @ValidationErrorResponse('name must be a string')
+    @ValidationErrorResponse('id must be an integer number')
+    @NotFoundErrorResponse('Skill id {id} not found')
     @Put('/editSkill/:id')
     async addSkills(
         @Param() pathParams: IdDto,

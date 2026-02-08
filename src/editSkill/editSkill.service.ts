@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import DbService from '../db/db.service';
-import type { SkillsListItem } from '../skills/skills.service';
+import SkillResponseDto from '../skills/dto/SkillResponseDto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AddOrEditSkillEvent } from '../skills/event/AddOrEditSkillEvent';
 
@@ -17,7 +17,7 @@ export default class EditSkillService {
         const oldItem = await conn('skill')
             .select('id', 'name')
             .where('id', id)
-            .first<SkillsListItem>();
+            .first<SkillResponseDto>();
         const nameChanged = oldItem.name !== name;
 
         if (!nameChanged) {

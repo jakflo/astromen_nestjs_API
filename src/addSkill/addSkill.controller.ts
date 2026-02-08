@@ -4,7 +4,18 @@ import AddSkillService from './addSkill.service';
 import SkillItemDto from '../skills/dto/SkillItemDto';
 import SkillsService from '../skills/skills.service';
 import { getSkillNameIsUsedErrorMessage } from '../utils/getValidationErrorMessage';
+import { ApiTags, ApiResponse, ApiBody, ApiProperty } from '@nestjs/swagger';
+import { ValidationErrorResponse } from '../utils/commonTypes';
 
+class AddSkillSuccessResponse {
+    @ApiProperty({ enum: ['new skill inserted'] })
+    status: 'new skill inserted';
+
+    @ApiProperty({ example: 1, description: 'New skill ID' })
+    newSkillId: number;
+}
+
+@ApiTags('skills')
 @Controller()
 export default class AddSkillController {
     constructor(
@@ -13,6 +24,13 @@ export default class AddSkillController {
     ) {}
 
     @Post('/addSkill')
+    @ApiBody({ type: SkillItemDto })
+    @ApiResponse({
+        status: 201,
+        description: 'New skill inserted',
+        type: AddSkillSuccessResponse,
+    })
+    @ValidationErrorResponse('name must be a string')
     async addSkills(
         @Body() data: SkillItemDto,
         @Res({ passthrough: true }) res: Response,

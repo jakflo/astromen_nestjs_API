@@ -10,10 +10,10 @@ import { TestContext, AstromanData } from './types';
 import { itemsPerPage } from '../src/config';
 import { INestApplication } from '@nestjs/common';
 import { formateDateToIso } from '../src/utils/dateTools';
-import type {
-    GetAstromenOutput,
-    AstromanRecord,
-} from '../src/getAstromen/getAstromen.service';
+import {
+    AstromanRecordDto,
+    GetAstromenResponseDto,
+} from '../src/getAstromen/dto/AstromanResponseDto';
 import { Knex } from 'knex';
 
 describe('/getAstromen (e2e)', () => {
@@ -97,7 +97,7 @@ async function makeRequest(
     page: number | null,
     itemsPerPage: number | null,
     app: INestApplication,
-): Promise<GetAstromenOutput> {
+): Promise<GetAstromenResponseDto> {
     type Query = {
         page?: number;
         itemsPerPage?: number;
@@ -114,7 +114,7 @@ async function makeRequest(
         .get('/astromen')
         .query(query)
         .expect(200);
-    const body = resp.body as GetAstromenOutput;
+    const body = resp.body as GetAstromenResponseDto;
 
     return body;
 }
@@ -123,7 +123,7 @@ async function makeRequest(
 async function checkRecordsId(
     page: number,
     itemsPerPage: number,
-    respData: AstromanRecord[],
+    respData: AstromanRecordDto[],
     conn: Knex | Knex.Transaction,
 ) {
     const offset = (page - 1) * itemsPerPage;
@@ -136,7 +136,7 @@ async function checkRecordsId(
         .limit(itemsPerPage);
     const idsInDbRecords = rawDbRecords.map((item: RawDbRecord) => item.id);
 
-    const idsInRespData = respData.map((item: AstromanRecord) => item.id);
+    const idsInRespData = respData.map((item: AstromanRecordDto) => item.id);
 
     expect(idsInDbRecords).toEqual(expect.arrayContaining(idsInRespData));
     expect(idsInRespData).toEqual(expect.arrayContaining(idsInDbRecords));
@@ -144,7 +144,7 @@ async function checkRecordsId(
 
 // data z response srovna s daty v DB; pokud nejaka data v response chyby, tak nebudou zkontrolovana, proto dobre nejdriv provest checkRecordsId()
 async function checkRecordsData(
-    respData: AstromanRecord[],
+    respData: AstromanRecordDto[],
     conn: Knex | Knex.Transaction,
 ) {
     type SkillInResponse = { id: number; name: string };

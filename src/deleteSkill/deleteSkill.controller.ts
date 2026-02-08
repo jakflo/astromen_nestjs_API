@@ -7,6 +7,19 @@ import {
     getSkillIdNotFoundErrorMessage,
     getSkillAllreadyUsedErrorMessage,
 } from '../utils/getValidationErrorMessage';
+import { ApiTags, ApiResponse, ApiProperty, ApiParam } from '@nestjs/swagger';
+import {
+    ValidationErrorResponse,
+    NotFoundErrorResponse,
+} from '../utils/commonTypes';
+
+class DeleteSkillSuccessResponse {
+    @ApiProperty({ enum: ['skill deleted'] })
+    status: 'skill deleted';
+
+    @ApiProperty({ example: 1, description: 'Deleted skill ID' })
+    itemId: number;
+}
 
 @Controller()
 export default class DeleteSkillController {
@@ -15,6 +28,18 @@ export default class DeleteSkillController {
         private readonly db: DbService,
     ) {}
 
+    @ApiTags('skills')
+    @ApiParam({
+        type: IdDto,
+        name: 'id',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Skill successfully deleted',
+        type: DeleteSkillSuccessResponse,
+    })
+    @ValidationErrorResponse('id must be an integer number')
+    @NotFoundErrorResponse('Skill id {id} not found')
     @Delete('/deleteSkill/:id')
     async deleteSkills(
         @Param() pathParams: IdDto,

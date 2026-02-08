@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { addSkill, setupTestApp, httpServerHelper } from './tools';
-import type { SkillsListItem } from '../src/skills/skills.service';
+import SkillResponseDto from '../src/skills/dto/SkillResponseDto';
 import { TestContext } from './types';
 
 describe('GetSkills (e2e)', () => {
@@ -16,7 +16,7 @@ describe('GetSkills (e2e)', () => {
             await addSkill(skillname, ctx.app);
         }
 
-        type respBody = { skills: SkillsListItem[] };
+        type respBody = { skills: SkillResponseDto[] };
         const resp = await request(httpServerHelper(ctx.app))
             .get('/allSkills')
             .send()
@@ -27,11 +27,11 @@ describe('GetSkills (e2e)', () => {
 
         for (const skillname of skillnames) {
             const skillIdInResponse = skillsInResponse.filter(
-                (item: SkillsListItem) => item.name === skillname,
+                (item: SkillResponseDto) => item.name === skillname,
             )[0].id;
             const skillIdInDb = (
                 await conn('skill')
-                    .where<SkillsListItem[]>('name', skillname)
+                    .where<SkillResponseDto[]>('name', skillname)
                     .first()
             ).id;
             expect(skillIdInResponse).toEqual(skillIdInDb);

@@ -3,6 +3,11 @@ import DbService from '../db/db.service';
 import PaginatorHelper from '../db/db.paginatorHelper';
 import type { RecordCountType } from '../db/db.service';
 import { formateDateToIso } from '../utils/dateTools';
+import {
+    AstromanRecordDto,
+    GetAstromenResponseDto,
+    AstromanItemWoSkillsWidDto,
+} from './dto/AstromanResponseDto';
 
 type AstromanDbRecord = {
     id: number;
@@ -16,27 +21,6 @@ type AstromanWithSkillListDbRecord = AstromanDbRecord & {
     skill_name: string;
 };
 
-type AstromanRecordWoSkills = {
-    id: number;
-    firstName: string;
-    lastName: string;
-    dob: string;
-};
-
-type AstromanRecord = AstromanRecordWoSkills & {
-    skills: Array<{
-        id: number;
-        name: string;
-    }>;
-};
-
-type GetAstromenOutput = {
-    itemsCount: number;
-    pagesCount: number;
-    page: number;
-    itemsInPage: AstromanRecord[];
-};
-
 @Injectable()
 export default class GetAstromenService {
     constructor(
@@ -47,7 +31,7 @@ export default class GetAstromenService {
     async getAstromen(
         page: number,
         itemsPerPage: number,
-    ): Promise<GetAstromenOutput> {
+    ): Promise<GetAstromenResponseDto> {
         const conn = this.db.getConn();
 
         const { limit, offset } = this.paginatorHelper.getLimitAndOffset(
@@ -69,7 +53,7 @@ export default class GetAstromenService {
                 itemsCount,
                 pagesCount,
                 page,
-                itemsInPage: [] as AstromanRecord[],
+                itemsInPage: [] as AstromanRecordDto[],
             };
         }
 
@@ -99,14 +83,14 @@ export default class GetAstromenService {
 
     private getItemsFromRawRecords(
         rawRecords: AstromanWithSkillListDbRecord[],
-    ): AstromanRecord[] {
+    ): AstromanRecordDto[] {
         const recordIdsWithDoops = rawRecords.map(
             (record: AstromanWithSkillListDbRecord) => {
                 return record.id;
             },
         );
         const recordIds = [...new Set(recordIdsWithDoops)];
-        const output: AstromanRecord[] = [];
+        const output: AstromanRecordDto[] = [];
 
         for (const id of recordIds) {
             const recordsWithId = rawRecords.filter(
@@ -116,7 +100,7 @@ export default class GetAstromenService {
             );
 
             const recordWoSkillsRaw = recordsWithId[0];
-            const recordWoSkills: AstromanRecordWoSkills = {
+            const recordWoSkills: AstromanItemWoSkillsWidDto = {
                 id: recordWoSkillsRaw.id,
                 firstName: recordWoSkillsRaw.first_name,
                 lastName: recordWoSkillsRaw.last_name,
@@ -142,4 +126,4 @@ export default class GetAstromenService {
     }
 }
 
-export type { AstromanDbRecord, AstromanRecord, GetAstromenOutput };
+export type { AstromanDbRecord };

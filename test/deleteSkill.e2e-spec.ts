@@ -8,7 +8,7 @@ import {
     setupTestApp,
     httpServerHelper,
 } from './tools';
-import type { SkillsListItem } from '../src/skills/skills.service';
+import SkillResponseDto from '../src/skills/dto/SkillResponseDto';
 import { TestContext } from './types';
 
 describe('DeleteSkill (e2e)', () => {
@@ -29,11 +29,11 @@ describe('DeleteSkill (e2e)', () => {
                 id: skillId_2,
             });
 
-        const skillRecord_1 = await conn('skill').where<SkillsListItem[]>(
+        const skillRecord_1 = await conn('skill').where<SkillResponseDto[]>(
             'id',
             skillId_1,
         );
-        const skillRecord_2 = await conn('skill').where<SkillsListItem[]>(
+        const skillRecord_2 = await conn('skill').where<SkillResponseDto[]>(
             'id',
             skillId_2,
         );
